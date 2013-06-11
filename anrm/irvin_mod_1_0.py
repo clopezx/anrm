@@ -41,17 +41,6 @@ from pysb.macros import *
 
 Model()
 
-
-Parameter('KF', 1e-6) # Generic association rate constant
-Parameter('KF2', 7e-6) # Generic association rate constant
-Parameter('KR', 1e-3) # Generic dessociation rate constant
-Parameter('KR2', 1) # Generic dessociation rate constant
-Parameter('KC', 1)    # Generic catalytic rate constant
-Parameter('KC2', 10)  # Generic catalytic rate constant
-Parameter('KC3', 1e-5)# Generic catalytic rate constant
-Parameter('KC4', 1e-1)# Generic catalytic rate constant
-Parameter('KE', 1e-4) # Generic gene expression rate constant
-
 Parameter('Ka_RIP1_FADD',   1e-7) # Biochemica et Biophysica Acta 1834(2013) 292-300
 Parameter('Kd_RIP1_FADD',   1e-8) # Biochemica et Biophysica Acta 1834(2013) 292-300
 
@@ -76,7 +65,6 @@ Parameter('Kc_PARPactiv',   1e-10) # This likely multistep process is modeled vi
                                    # catalysis reaction with slow rate coefficient.
 Parameter('Kc_PARPautoa',   4e-4)
 
-Parameter('Kdeg', 1e-7)
 
 # SECTION ONE: Receptor signalling and Bid Activation
 # ===================================================
@@ -123,7 +111,7 @@ def CD95_to_SecondaryComplex():
     Parameter('FADD_0'  ,  1.0e3) # molecules per cell (arbitrarily assigned)1000
     Parameter('flip_L_0',  1.0e4) # molecules per cell
     Parameter('flip_S_0',  1.0e4) # molecules per cell
-    Parameter('proC8_0' ,  1.5e4) # procaspase 8 molecules per cell 20000
+    Parameter('proC8_0' ,  2.0e4) # procaspase 8 molecules per cell 20000
     Parameter('C8_0'    ,      0) # active caspase 8 dimers per cell.
     Parameter('Bar_0'   ,  1.0e3) # Bar molecules per cell.
 
@@ -158,26 +146,46 @@ def CD95_to_SecondaryComplex():
     # C8 + TRAF2 >> TRAF2
     
     # -------------DISC assembly----------------
-    bind(Fas(blig=None), 'blig',  CD95(blig = None, bDD = None), 'blig', [KF, KR])
-    bind(CD95(blig = ANY, bDD = None), 'bDD', FADD(bDD = None, bDED1 =None, bDED2 = None), 'bDD', [KF, KR])
+    Parameter('kf1', 1e-6) # Generic association rate constant
+    Parameter('kr1', 1e-3) # Generic dessociation rate constant
+    bind(Fas(blig=None), 'blig',  CD95(blig = None, bDD = None), 'blig', [kf1, kr1])
+
+    Parameter('kf2', 1e-6) # Generic association rate constant
+    Parameter('kr2', 1e-3) # Generic dessociation rate constant
+    bind(CD95(blig = ANY, bDD = None), 'bDD', FADD(bDD = None, bDED1 =None, bDED2 = None), 'bDD', [kf2, kr2])
     
-    bind(FADD(bDD = ANY, bDED1 = None, bDED2 = None),'bDED1', proC8(bDED = None), 'bDED', [KF2, KR2])
+    Parameter('kf3', 1e-6) # Generic association rate constant
+    Parameter('kr3', 1e-3) # Generic dessociation rate constant
+    bind(FADD(bDD = ANY, bDED1 = None, bDED2 = None),'bDED1', proC8(bDED = None), 'bDED', [kf3, kr3])
     # For simplicity allow proC8 to bind FADD before any c-Flip do.
-    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', flip_L(bDED = None), 'bDED', [KF2, KR2])
-    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', flip_S(bDED = None), 'bDED', [KF2, KR2])
+
+    Parameter('kf4', 1e-6) # Generic association rate constant
+    Parameter('kr4', 1e-3) # Generic dessociation rate constant
+    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', flip_L(bDED = None), 'bDED', [kf4, kr4])
+
+    Parameter('kf5', 1e-6) # Generic association rate constant
+    Parameter('kr5', 1e-3) # Generic dessociation rate constant
+    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', flip_S(bDED = None), 'bDED', [kf5, kr5])
     
     
     # procaspase 8 dimerization and activation
-    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', proC8(bDED = None), 'bDED', [KF2, KR2])
+    Parameter('kf6', 1e-6) # Generic association rate constant
+    Parameter('kr6', 1e-3) # Generic dessociation rate constant
+    Parameter('kc6', 1e-1) # Generic catalytic rate constant
+    bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', proC8(bDED = None), 'bDED', [kf6, kr6])
     DISC_proC8 = CD95(blig=ANY, bDD=ANY) % Fas(blig=ANY) % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % proC8(bDED=ANY)%proC8(bDED=ANY)
     DISC = CD95(blig=ANY, bDD=ANY) % Fas(blig=ANY) % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)
-    Rule('C8_activation', FADD(bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED = ANY) >> FADD(bDED1 = None, bDED2 = None) + C8(bC8 = None), KC4)
+    Rule('C8_activation', FADD(bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED = ANY) >> FADD(bDED1 = None, bDED2 = None) + C8(bC8 = None), kc6)
 
     # caspase 8 inhibition by BAR
-    bind(Bar(bC8 = None), 'bC8', C8(bC8 = None), 'bC8', [KF, KR])
+    Parameter('kf7', 1e-6) # Generic association rate constant
+    Parameter('kr7', 1e-3) # Generic dessociation rate constant
+    bind(Bar(bC8 = None), 'bC8', C8(bC8 = None), 'bC8', [kf7, kr7])
     
     # release of secondary complex from the DISC
-    bind(FADD(bDD = None, bDED2 = ANY, bDED1 = ANY), 'bDD', CD95(blig = ANY, bDD=None), 'bDD', [Parameter('k1', 0),KR])
+    Parameter('kf8', 1e-10)# Low, non-zero affinity for forward reaction because this is documented as a release reaction.
+    Parameter('kr8', 1e-3) # Generic dessociation rate constant
+    bind(FADD(bDD = None, bDED2 = ANY, bDED1 = ANY), 'bDD', CD95(blig = ANY, bDD=None), 'bDD', [kf8,kr8])
 
 def TNFR1_to_SecondaryComplex_monomers():
     """ Declares TNFa, TNFR1, TRADD, CompI, RIP1, A20, CYLD, NEMO and NFkB.
@@ -216,8 +224,8 @@ def TNFR1_to_SecondaryComplex():
     Parameter('TNFa_0'  ,  3000) # 3000 corresponds to 50ng/ml TNFa
     Parameter('TNFR1_0' ,   200) # 200 receptors per cell
     Parameter('TRADD_0' ,  1000) # molecules per cell (arbitrarily assigned)1000
-    Parameter('CompI_0' ,     0) # complexes per cell
     Parameter('RIP1_0'  , 20000) # molecules per cell 20000
+    Parameter('CompI_0' ,     0) # complexes per cell
     Parameter('NFkB_0'  ,     0) # molecules per cell
     
     Initial(TNFa(blig=None), TNFa_0)                                 # TNFa Ligand
@@ -248,25 +256,53 @@ def TNFR1_to_SecondaryComplex():
     # ------------------------------------------
     
     # -------------Complex I assembly----------------
-    bind(TNFa(blig=None), 'blig', TNFR1(blig=None, bDD=None, state='norm'), 'blig', [KF, KR])
-    bind(TNFR1(blig = ANY, bDD = None, state =  'norm'), 'bDD', TRADD(bDD1=None, bDD2=None, state='inactive'), 'bDD1', [KF, KR])
+    Parameter('kf9', 1e-6) # Generic association rate constant
+    Parameter('kr9', 1e-3) # Generic dessociation rate constant
+    bind(TNFa(blig=None), 'blig', TNFR1(blig=None, bDD=None, state='norm'), 'blig', [kf9, kr9])
+
+    Parameter('kf10', 1e-6) # Generic association rate constant
+    Parameter('kr10', 1e-3) # Generic dessociation rate constant
+    Parameter('kc10', 1)    # Generic catalytic rate constant
+    bind(TNFR1(blig = ANY, bDD = None, state =  'norm'), 'bDD', TRADD(bDD1=None, bDD2=None, state='inactive'), 'bDD1', [kf10, kr10])
     preCompI = TNFa(blig=ANY)%TNFR1(blig=ANY, bDD=ANY, state = 'norm')%TRADD(bDD1 = ANY, bDD2=None, state = 'inactive')
-    Rule('CompI_formation', preCompI >> CompI(bDD=None, state = 'unmod'), KC)
+    Rule('CompI_formation', preCompI >> CompI(bDD=None, state = 'unmod'), kc10)
     
     # --------------Complex I - RIP1 Modification-----------------
-    bind(CompI(bDD=None, state = 'unmod'), 'bDD', RIP1(bDD=None, bRHIM = None, state='unmod'), 'bDD',[KF, KR])
-    bind(CompI(bDD=None, state = 'unmod'), 'bDD', RIP1(bDD=None, bRHIM = None, state='ub'), 'bDD',[KF, KR])
+    Parameter('kf11', 1e-6) # Generic association rate constant
+    Parameter('kr11', 1e-3) # Generic dessociation rate constant
+    bind(CompI(bDD=None, state = 'unmod'), 'bDD', RIP1(bDD=None, bRHIM = None, state='unmod'), 'bDD',[kf11, kr11])
+
+    Parameter('kf12', 1e-6) # Generic association rate constant
+    Parameter('kr12', 1e-3) # Generic dessociation rate constant
+    bind(CompI(bDD=None, state = 'unmod'), 'bDD', RIP1(bDD=None, bRHIM = None, state='ub'), 'bDD',[kf12, kr12])
     
-    Rule('CompI_Ub', CompI(bDD=ANY, state = 'unmod')%RIP1(bDD=ANY,bRHIM=None, state = 'unmod')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub'), KC)
-    Rule('CompI_Ub2', CompI(bDD=ANY, state = 'unmod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub'), KC)
-    Rule('CompI_deUb', CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,  state='ub')>>CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,state='unmod'),KC)
-    Rule('RIP1_deg', CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,  state='unmod') >> CompI(bDD=None, state='mod'),KF)
-    bind(CompI(bDD=None, state='mod'), 'bDD', RIP1(bDD=None, bRHIM = None,  state = 'unmod'), 'bDD', [Parameter('k2', 0), KR])
-    Rule('TNFR1_recycle', CompI(bDD=None, state='mod') >> TRADD(bDD1=None, bDD2 = None, state='active') + TNFR1(blig = None, bDD = None, state =  'norm'), KC)
-    Rule('NFkB_expression', CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub') + NFkB(bf=None), KE)
+    Parameter('kc13', 1)    # Generic catalytic rate constant
+    Rule('CompI_Ub', CompI(bDD=ANY, state = 'unmod')%RIP1(bDD=ANY,bRHIM=None, state = 'unmod')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub'), kc13)
+    
+    Parameter('kc14', 1)    # Generic catalytic rate constant
+    Rule('CompI_Ub2', CompI(bDD=ANY, state = 'unmod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub'), kc14)
+    
+    Parameter('kc15', 1)    # Generic catalytic rate constant
+    Rule('CompI_deUb', CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,  state='ub')>>CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,state='unmod'), kc15)
+
+    Parameter('kc16', 1)    # Generic catalytic rate constant
+    Rule('RIP1_deg', CompI(bDD=ANY, state='mod')%RIP1(bDD=ANY, bRHIM=None,  state='unmod') >> CompI(bDD=None, state='mod'),kc16)
+    
+    Parameter('kf17', 1e-10)# low affinity association rate constant because this reaction should net in release.
+    Parameter('kr17', 1)    # Generic dissociation rate constant
+    bind(CompI(bDD=None, state='mod'), 'bDD', RIP1(bDD=None, bRHIM = None,  state = 'unmod'), 'bDD', [kf17, kr17])
+    
+    Parameter('kc18', 1)    # Generic catalytic rate constant
+    Rule('TNFR1_recycle', CompI(bDD=None, state='mod') >> TRADD(bDD1=None, bDD2 = None, state='active') + TNFR1(blig = None, bDD = None, state =  'norm'), kc18)
+    
+    Parameter('kc19', 1e-5)    # Generic catalytic rate constant
+    Rule('NFkB_expression', CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub')>> CompI(bDD=ANY, state = 'mod')%RIP1(bDD=ANY,bRHIM=None, state = 'ub') + NFkB(bf=None), kc19)
     # --------------RIP1 Ubiquitination---------------------------
-    # Rule('RIP1_Ub', RIP1(bDD=None, bRHIM = None, state='unmod')>> RIP1(bDD=None, bRHIM = None, state='ub'), KC2)
-    # Rule('RIP1_deUb', RIP1(bDD=None, bRHIM = None, state='ub')>> RIP1(bDD=None, bRHIM = None, state='unmod'), KC3)
+    Parameter('kc20', 1e-7)    # Generic catalytic rate constant
+    Rule('RIP1_Ub', RIP1(bDD=None, bRHIM = None, state='unmod')>> RIP1(bDD=None, bRHIM = None, state='ub'), kc20)
+
+    Parameter('kc21', 1e-10)    # Generic catalytic rate constant
+    Rule('RIP1_deUb', RIP1(bDD=None, bRHIM = None, state='ub')>> RIP1(bDD=None, bRHIM = None, state='unmod'), kc21)
 
 def SecondaryComplex_to_Bid_monomers():
     Monomer('Bid', ['bf', 'state'], {'state':['unmod', 'po4', 'trunc','M']})
@@ -288,10 +324,12 @@ def SecondaryComplex_to_Bid():
         This model also produces Secondary complex, FADD:proC8:c-Flip.
         """
     Parameter('RIP3_0'  , 2.0e4) # molecules per cell
-    Parameter('Bid_0'   , 2.0e4) # molecules per cell
+    Parameter('Bid_0'   , 2.0e4) # 2.0e4 molecules per cell
     Parameter('BidK_0'  , 5.0e3) # molecules per cell
     
     Initial(RIP3(bRHIM = None, state = 'unmod'), RIP3_0)   # RIP3
+    
+    
     Initial(Bid(bf = None, state = 'unmod'), Bid_0)        # Bid
     Initial(BidK(bf = None), BidK_0)
     # ==============================================================
@@ -316,52 +354,85 @@ def SecondaryComplex_to_Bid():
     #   Bid + C8 <-> Bid:C8 >> Bid[trunc] + C8
     
     # -------------Assembling Complex II-----------------
-    bind(FADD(bDD = None, bDED1 = None, bDED2 = None), 'bDD', TRADD(bDD1=None, state = 'active'), 'bDD1', [KF, KR])
+    Parameter('kf22', 1e-6) # Generic association rate constant
+    Parameter('kr22', 1e-3) # Generic dessociation rate constant
+    bind(FADD(bDD = None, bDED1 = None, bDED2 = None), 'bDD', TRADD(bDD1=None, state = 'active'), 'bDD1', [kf22, kr22])
+
+    #Parameter('kf23', 1e-6) # Generic association rate constant
+    #Parameter('kr23', 1e-3) # Generic dessociation rate constant
     bind(FADD(bDD = None, bDED1 = None, bDED2 = None), 'bDD', RIP1(bDD=None, bRHIM = None, state = 'unmod'), 'bDD', [Ka_RIP1_FADD, Kd_RIP1_FADD])
-    bind(TRADD(bDD2 = None, state = 'active'),'bDD2', RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bDD', [KF, KR])
+    
+    Parameter('kf24', 1e-6) # Generic association rate constant
+    Parameter('kr24', 1e-3) # Generic dessociation rate constant
+    bind(TRADD(bDD2 = None, state = 'active'),'bDD2', RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bDD', [kf24, kr24])
     # For simplicity, I am neglecting the binary intereaction that occurs between proC8 and RIP1.
     # Binding of proC8 and c-flip to FADD is accomplished in CD95_to_Secondary complex. 
 
     #--------------RIP1 Truncation reactions-------------
     #---Truncation by C8---------------------------------
+    Parameter('kc25', 1e-1)    # Generic catalytic rate constant
     CIIA = TRADD(bDD2 = None, bDD1 = ANY, state = 'active') %  FADD(bDD=ANY, bDED1=None, bDED2=None)
     RIP_CIIA_proC8 = RIP1(bDD=ANY, bRHIM = None, state = 'unmod')% TRADD(bDD2 = None, bDD1 = ANY, state = 'active') % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)%proC8(bDED=ANY)%proC8(bDED=ANY)
     RIP_CIIB_proC8 = RIP1(bDD=ANY, bRHIM = None, state = 'unmod')% FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)%proC8(bDED=ANY)%proC8(bDED=ANY)
-    Rule('RIP1_truncation_CIIA', RIP_CIIA_proC8 >> CIIA + C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), KC)
-    Rule('RIP1_truncation_CIIB', RIP_CIIB_proC8 >> FADD(bDD=None, bDED1=None, bDED2=None)+ C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), KC)
+    Rule('RIP1_truncation_CIIA', RIP_CIIA_proC8 >> CIIA + C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
+    Rule('RIP1_truncation_CIIB', RIP_CIIB_proC8 >> FADD(bDD=None, bDED1=None, bDED2=None)+ C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
     
-    catalyze_state(C8(bC8=None), 'bC8', RIP1(bDD=None), 'bRHIM', 'state', 'unmod', 'trunc', [KF, KR, KC2])
+    Parameter('kf26', 1e-6) # Generic association rate constant
+    Parameter('kr26', 1e-3) # Generic dessociation rate constant
+    Parameter('kc26', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C8(bC8=None), 'bC8', RIP1(bDD=None), 'bRHIM', 'state', 'unmod', 'trunc', [kf26, kr26, kc26])
 
     #---Truncation by proC8:cFlip_L---------------------
+    Parameter('kc27', 1e-1) # Generic catalytic rate constant
     Riptosome_FADD = RIP1(bDD=1, bRHIM = None, state = 'unmod')%FADD(bDD=1, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY)
-    Rule('RIP1_truncation2', Riptosome_FADD >> FADD(bDD=None, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), KC)
+    Rule('RIP1_truncation2', Riptosome_FADD >> FADD(bDD=None, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc27)
 
+    Parameter('kc28', 1e-1) # Generic catalytic rate constant
     Riptosome_TRADD = RIP1(bDD=1, bRHIM = None, state = 'unmod')%TRADD(bDD1=ANY, bDD2=1)%FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY)
-    Rule('RIP1_truncation1', Riptosome_TRADD >> FADD(bDD=None, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), KC)
+    Rule('RIP1_truncation1', Riptosome_TRADD >> FADD(bDD=None, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc28)
     
-    # -------------RIP3 Binding Interactions
+    # -------------RIP3 Binding Interactions----------------
+    Parameter('kf29', 1e-6) # Generic association rate constant
+    Parameter('kr29', 1e-3) # Generic dessociation rate constant
     Ripto1_Flip_S = FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % RIP1(bDD=ANY, bRHIM=None, state='unmod') % TRADD(bDD1=ANY, bDD2=ANY, state='active') % flip_S(bDED=ANY) % proC8(bDED=ANY)
     Necrosome1 = FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % RIP1(bDD=ANY, bRHIM=6, state='unmod') % TRADD(bDD1=ANY, bDD2=ANY, state='active') % flip_S(bDED=ANY) % proC8(bDED=ANY) % RIP3(bRHIM= 6, state = 'unmod')
-    Rule('RIP3_binding1', Ripto1_Flip_S + RIP3(bRHIM= None, state = 'unmod') <> Necrosome1, KF, KR)
+    Rule('RIP3_binding1', Ripto1_Flip_S + RIP3(bRHIM= None, state = 'unmod') <> Necrosome1, kf29, kr29)
 
+    Parameter('kf30', 1e-6) # Generic association rate constant
+    Parameter('kr30', 1e-3) # Generic dessociation rate constant
     Ripto2_Flip_S = FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % RIP1(bDD=ANY, bRHIM=None, state='unmod') % flip_S(bDED=ANY) % proC8(bDED=ANY)
     Necrosome2 = FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % RIP1(bDD=ANY, bRHIM=5, state='unmod') % flip_S(bDED=ANY) % proC8(bDED=ANY) % RIP3(bRHIM= 5, state = 'unmod')
-    Rule('RIP3_binding2', Ripto2_Flip_S + RIP3(bRHIM= None, state = 'unmod') <> Necrosome2, KF, KR)
+    Rule('RIP3_binding2', Ripto2_Flip_S + RIP3(bRHIM= None, state = 'unmod') <> Necrosome2, kf30, kr30)
     
     #RIP3 Truncation
-    catalyze_state(C8(bC8=None), 'bC8', RIP3(), 'bRHIM', 'state', 'unmod', 'trunc', [KF, KR, KC])
+    Parameter('kf31', 1e-6) # Generic association rate constant
+    Parameter('kr31', 1e-3) # Generic dessociation rate constant
+    Parameter('kc31', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C8(bC8=None), 'bC8', RIP3(), 'bRHIM', 'state', 'unmod', 'trunc', [kf31, kr31, kc31])
 
     # Bid Phosphorylation and Truncation
-    catalyze_state(BidK(), 'bf', Bid(), 'bf', 'state', 'unmod', 'po4', [KF, KR, KC])
-    catalyze_state(C8(bC8=None), 'bC8', Bid(), 'bf', 'state', 'unmod', 'trunc', [KF, KR, KC])
+    Parameter('kf32', 1e-6) # Generic association rate constant
+    Parameter('kr32', 1e-3) # Generic dessociation rate constant
+    Parameter('kc32', 1e-1) # Generic catalytic rate constant
+    catalyze_state(BidK(), 'bf', Bid(), 'bf', 'state', 'unmod', 'po4', [kf32, kr32, kc32])
+
+    Parameter('kf33', 1e-6) # Generic association rate constant
+    Parameter('kr33', 1e-3) # Generic dessociation rate constant
+    Parameter('kc33', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C8(bC8=None), 'bC8', Bid(), 'bf', 'state', 'unmod', 'trunc', [kf33, kr33, kc33])
 
     # Bid-PO4 competing with RIP1 for binding to Complex II
-    bind(TRADD(bDD2 = None, state = 'active'),'bDD2', Bid(bf = None, state = 'po4'), 'bf', [KF, KR])
+    Parameter('kf34', 1e-6) # Generic association rate constant
+    Parameter('kr34', 1e-3) # Generic dessociation rate constant
+    bind(TRADD(bDD2 = None, state = 'active'),'bDD2', Bid(bf = None, state = 'po4'), 'bf', [kf34, kr34])
     # Bid-PO4 sequestering RIP1
-    bind(RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bRHIM', Bid(bf = None, state = 'po4'), 'bf', [KF, KR])
+    Parameter('kf35', 1e-6) # Generic association rate constant
+    Parameter('kr35', 1e-3) # Generic dessociation rate constant
+    bind(RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bRHIM', Bid(bf = None, state = 'po4'), 'bf', [kf35, kr35])
 
     # RIP1 degradation
-    degrade(RIP1(bDD=None, bRHIM = None, state = 'unmod'), Kdeg)
+    Parameter('kc36', 1e-1) # Generic catalytic rate constant
+    degrade(RIP1(bDD=None, bRHIM = None, state = 'unmod'), kc36)
 
 # Shared functions
 # ================
@@ -414,10 +485,10 @@ def declare_initial_conditions():
     Parameter('Bcl2_0'  , 2.0e4) # Mitochondrial Bcl2
     Parameter('Bad_0'   , 1.0e3) # Bad
     Parameter('Noxa_0'  , 1.0e3) # Noxa
-    Parameter('CytoC_0' , 5.0e5) # cytochrome c
-    Parameter('Smac_0'  , 1.0e5) # Smac
-    Parameter('Bax_0'   , 0.8e5) # Bax
-    Parameter('Bak_0'   , 0.2e5) # Bak
+    Parameter('CytoC_0' , 5.0e8) # 5.0e5 cytochrome c
+    Parameter('Smac_0'  , 1.0e8) # 1.0e5 Smac
+    Parameter('Bax_0'   , 0.8e7) # 0.8e5 Bax
+    Parameter('Bak_0'   , 0.2e7) # 0.2e5 Bak
 
     alias_model_components()
 
@@ -446,8 +517,15 @@ def translocate_tBid_Bax_BclxL():
 
 def tBid_activates_Bax_and_Bak():
     """tBid activates Bax and Bak."""
-    catalyze_state(Bid(state='M'), 'bf', Bax(state='M'), 'bf', 'state', 'M', 'A', [KF, KR, KC])
-    catalyze_state(Bid(state='M'), 'bf', Bak(state='M'), 'bf', 'state', 'M', 'A', [KF, KR, KC])
+    Parameter('kf37', 1e-6) # Generic association rate constant
+    Parameter('kr37', 1e-3) # Generic dessociation rate constant
+    Parameter('kc37', 1e-1) # Generic catalytic rate constant
+    catalyze_state(Bid(state='M'), 'bf', Bax(state='M'), 'bf', 'state', 'M', 'A', [kf37, kr37, kc37])
+
+    Parameter('kf38', 1e-6) # Generic association rate constant
+    Parameter('kr38', 1e-3) # Generic dessociation rate constant
+    Parameter('kc38', 1e-1) # Generic catalytic rate constant
+    catalyze_state(Bid(state='M'), 'bf', Bak(state='M'), 'bf', 'state', 'M', 'A', [kf38, kr38, kc38])
 
 N_A = 6.022e23
 V   = 1.0e-12
@@ -578,10 +656,10 @@ def pore_to_parp():
 
     # Declare initial conditions:
 
-    Parameter('Apaf_0'  , 1.0e5) # Apaf-1
+    Parameter('Apaf_0'  , 1.0e6) # 1.0e5 Apaf-1
     Parameter('C3_0'    , 1.0e4) # procaspase-3 (pro-C3)
     Parameter('C6_0'    , 1.0e4) # procaspase-6 (pro-C6)
-    Parameter('C9_0'    , 1.0e5) # procaspase-9 (pro-C9)
+    Parameter('C9_0'    , 1.0e6) # 1.0e5 procaspase-9 (pro-C9)
     Parameter('XIAP_0'  , 1.0e5) # X-linked inhibitor of apoptosis protein
     Parameter('PARP_0'  , 1.0e6) # C3* substrate
 
@@ -596,9 +674,10 @@ def pore_to_parp():
 
     # CytoC and Smac activation after release
     # --------------------------------------
-
-    equilibrate(Smac(bf=None, state='C'), Smac(bf=None, state='A'), [KF, KF])
-    equilibrate(CytoC(bf=None, state='C'), CytoC(bf=None, state='A'),[KF, KF])
+    Parameter('ktr39', 1e-6) # Generic association rate constant
+    Parameter('ktr40', 1e-6) # Generic dessociation rate constant
+    equilibrate(Smac(bf=None, state='C'), Smac(bf=None, state='A'), [ktr39, ktr39])
+    equilibrate(CytoC(bf=None, state='C'), CytoC(bf=None, state='A'),[ktr40, ktr40])
 
     # Apoptosome formation
     # --------------------
@@ -606,20 +685,29 @@ def pore_to_parp():
     #   aApaf + pC9 <-->  Apop
     #   Apop + pC3 <-->  Apop:pC3 --> Apop + C3
 
-    catalyze_state(CytoC(state = 'A'), 'bf', Apaf(), 'bf', 'state', 'I', 'A', [Kf_Apaf_acti, KR, KC])
-    bind(Apaf(bf=None, state='A'),'bf', C9(bf=None), 'bf', [Kf_Apop_asse, KR])
-    Rule('Apoptosome', Apaf(bf=ANY, state = 'A')%C9(bf=ANY)>>Apop(bf=None), KC)
+    Parameter('kr41', 1e-3) # Generic dessociation rate constant
+    Parameter('kc41', 1e-1) # Generic catalytic rate constant
+    catalyze_state(CytoC(state = 'A'), 'bf', Apaf(), 'bf', 'state', 'I', 'A', [Kf_Apaf_acti, kr41, kc41])
+    
+    Parameter('kr42', 1e-3) # Generic dessociation rate constant
+    bind(Apaf(bf=None, state='A'),'bf', C9(bf=None), 'bf', [Kf_Apop_asse, kr42])
+    
+    Parameter('kc43', 1e-1) # Generic catalytic rate constant
+    Rule('Apoptosome', Apaf(bf=ANY, state = 'A')%C9(bf=ANY)>>Apop(bf=None), kc43)
     #one_step_conv.. I could not find this macro in the tutorial. I think it removed.
     #one_step_conv(Apaf(state='A'), C9(), Apop(bf=None), [Kf_Apop_asse, KR])
-    catalyze_state(Apop(), 'bf', C3(), 'bf', 'state', 'pro', 'A', [Kf_C3_activa, KR, KC]) 
+    Parameter('kr44', 1e-3) # Generic dessociation rate constant
+    Parameter('kc44', 1e-1) # Generic catalytic rate constant
+    catalyze_state(Apop(), 'bf', C3(), 'bf', 'state', 'pro', 'A', [Kf_C3_activa, kr44, kc44])
 
     # Apoptosome-related inhibitors
     # -----------------------------
     #   Apop + XIAP <-->  Apop:XIAP  
     #   cSmac + XIAP <-->  cSmac:XIAP  
-
-    bind(Apop(bf=None), 'bf', XIAP(bf=None), 'bf', [Kf_Apop_inhi, KR]) 
-    bind(Smac(bf=None, state='A'), 'bf', XIAP(bf=None), 'bf', [Kf_Smac_inhi, KR]) 
+    Parameter('kr45', 1e-3) # Generic dessociation rate constant
+    bind(Apop(bf=None), 'bf', XIAP(bf=None), 'bf', [Kf_Apop_inhi, kr45])
+    Parameter('kr46', 1e-3) # Generic dessociation rate constant
+    bind(Smac(bf=None, state='A'), 'bf', XIAP(bf=None), 'bf', [Kf_Smac_inhi, kr46])
 
     # Caspase reactions
     # -----------------
@@ -630,13 +718,38 @@ def pore_to_parp():
     #   XIAP + C3 <--> XIAP:C3 --> XIAP + C3_U CSPS
     #   PARP + C3 <--> PARP:C3 --> CPARP + C3 CSPS
     #   pC8 + C6 <--> pC8:C6 --> C8 + C6 CSPS
-    catalyze_state(C8(), 'bC8', C3(),'bf', 'state', 'pro','A', [Kf_C3_activ2, KR, KC])
-    catalyze_state(XIAP(), 'bf', C3(), 'bf', 'state', 'A', 'ub', [Kf_C3_ubiqui, KR, Kc_C3_ubiqui])
-    catalyze_state(C3(state='A'), 'bf', PARP(state='U'),'bf', 'state', 'U', 'C', [KF, Kr_PARP_clea, KC])
-    catalyze_state(C3(state='A'), 'bf', C6(bf2 = None), 'bf1', 'state', 'pro', 'A', [KF, KR, KC])
-    bind(C6(bf1 = None, bf2 = None, state = 'A'), 'bf1', proC8(bDED = None), 'bDED', [Kf_C8_activ2, Kr_C8_activ2])
-    bind(C6(bf1 = ANY, bf2 = None, state = 'A'), 'bf2', proC8(bDED = None), 'bDED', [Kf_C8_activ2, Kr_C8_activ2])
-    Rule('C8_activation_byC6', C6(bf1 = ANY, bf2 = ANY, state = 'A')%proC8(bDED = ANY)%proC8(bDED = ANY) >> C8(bC8=None) + C6(bf1=None, bf2=None, state = 'A'), Kc_C8_activ2)
+    
+    Parameter('kf47', 1e-7) # Generic association rate constant
+    Parameter('kr47', 1e-3) # Generic dessociation rate constant
+    Parameter('kc47', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C8(), 'bC8', C3(),'bf', 'state', 'pro','A', [kf47, kr47, kc47])
+    
+    Parameter('kf48', 1e-6) # Generic association rate constant
+    Parameter('kr48', 1e-3) # Generic dessociation rate constant
+    Parameter('kc48', 1e-1) # Generic catalytic rate constant
+    catalyze_state(XIAP(), 'bf', C3(), 'bf', 'state', 'A', 'ub', [kf48, kr48, kc48])
+    
+    
+    Parameter('kf49', 1e-6) # Generic association rate constant
+    Parameter('kr49', 1e-3) # Generic dessociation rate constant
+    Parameter('kc49', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C3(state='A'), 'bf', PARP(state='U'),'bf', 'state', 'U', 'C', [kf49, kr49, kc49])
+    
+    Parameter('kf50', 1e-6) # Generic association rate constant
+    Parameter('kr50', 1e-3) # Generic dessociation rate constant
+    Parameter('kc50', 1e-1) # Generic catalytic rate constant
+    catalyze_state(C3(state='A'), 'bf', C6(bf2 = None), 'bf1', 'state', 'pro', 'A', [kf50, kr50, kc50])
+    
+    
+    Parameter('kf51', 1e-6) # Generic association rate constant
+    Parameter('kr51', 1e-3) # Generic dessociation rate constant
+    bind(C6(bf1 = None, bf2 = None, state = 'A'), 'bf1', proC8(bDED = None), 'bDED', [kf51, kr51])
+    
+    Parameter('kf52', 1e-6) # Generic association rate constant
+    Parameter('kr52', 1e-3) # Generic dessociation rate constant
+    Parameter('kc52', 1e-1) # Generic catalytic rate constant
+    bind(C6(bf1 = ANY, bf2 = None, state = 'A'), 'bf2', proC8(bDED = None), 'bDED', [kf52, kr52])
+    Rule('C8_activation_byC6', C6(bf1 = ANY, bf2 = ANY, state = 'A')%proC8(bDED = ANY)%proC8(bDED = ANY) >> C8(bC8=None) + C6(bf1=None, bf2=None, state = 'A'), kc52)
          
     #catalyze(C6(state='A'), C8(state='pro'), C8(state='A'), [Kf_C8_activ2, KR, KC])
 
@@ -649,9 +762,18 @@ def rip1_to_parp():
     Uses RIP1, RIP3 and PARP monomers and their associated parameters to generate
     the rules that describe RIP1, RIP3 phosphorylation, and PARP-1 activation.
     """
-    Rule('Rip_PO4lation', RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state='unmod') >> RIP1(bRHIM=ANY, state = 'po4')%RIP3(bRHIM=ANY, state = 'po4'), KC)
-    catalyze_state(RIP1(state='po4'), 'bPARP', PARP(), 'bf', 'state', 'U', 'A', [KF, KR, KC])
-    catalyze_state(PARP(state='A'), 'bf', PARP(), 'bf', 'state', 'U', 'A', [KF, KR, Kc_PARPautoa])
+    Parameter('kc53', 1e-1) # Generic catalytic rate constant
+    Rule('Rip_PO4lation', RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state='unmod') >> RIP1(bRHIM=ANY, state = 'po4')%RIP3(bRHIM=ANY, state = 'po4'), kc53)
+    
+    Parameter('kf54', 1e-6) # Generic association rate constant
+    Parameter('kr54', 1e-3) # Generic dessociation rate constant
+    Parameter('kc54', 1e-1) # Generic catalytic rate constant
+    catalyze_state(RIP1(state='po4'), 'bPARP', PARP(), 'bf', 'state', 'U', 'A', [kf54, kr54, kc54])
+    
+    Parameter('kf55', 1e-6) # Generic association rate constant
+    Parameter('kr55', 1e-3) # Generic dessociation rate constant
+    Parameter('kc55', 1e-1) # Generic catalytic rate constant
+    catalyze_state(PARP(state='A'), 'bf', PARP(), 'bf', 'state', 'U', 'A', [kf55, kr55, kc55])
     #Rule('PARP_activata', RIP1(state = 'po4') + PARP(bf=None, state='U') >> RIP1(state = 'po4') + PARP(bf=None, state='A'), Kc_PARPactiv)
     
     #Rule('PARP_autoacti', PARP(bf=None, state='A') + PARP(bf=None, state = 'U') >> PARP(bf=None, state='A') + PARP(bf=None, state='A'), Kc_PARPautoa)
@@ -709,6 +831,7 @@ Observable('Obs_proC8', proC8())
 Observable('Obs_C8', C8())
 Observable('Obs_C3ub', C3(state = 'ub'))
 Observable('Obs_C3', C3(state = 'A'))
+Observable('Obs_pC3', C3(state = 'pro'))
 Observable('Obs_Apaf', Apaf(state = 'A'))
 Observable('Obs_Apop', Apop())
 Observable('Obs_Cyc', CytoC(bf=None, state='C'))
@@ -719,5 +842,3 @@ Observable('Obs_aPARP', PARP(state='A'))
 Observable('Obs_PARP', PARP(state='U'))
 
 Observable('RIP1_TRADD', RIP1()%TRADD())
-
-
