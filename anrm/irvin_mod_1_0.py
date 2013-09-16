@@ -143,7 +143,6 @@ def CD95_to_SecondaryComplex():
     # Regulation (downstream of CD95) of Caspase 8 activity
     # ------------------------------------------
     # C8 + BAR <-> C8:BAR
-    # C8 + TRAF2 >> TRAF2
     
     # -------------DISC assembly----------------
     Parameter('kf1', 1e-6) # Generic association rate constant

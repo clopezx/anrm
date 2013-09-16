@@ -66,7 +66,7 @@ def CD95_to_SecondaryComplex_monomers():
     Monomer('flip_L', ['bDED'])   #c-Flip[L] binds FADD at bca1 or bca2
     Monomer('flip_S', ['bDED'])   #c-Flip[S] binds FADD at bca1 or bca2
     Monomer('proC8', ['bDED'])    #procaspase 8 binds FADD at bca1 or bca2
-    Monomer('C8', ['bC8'])        #active caspase 8
+    Monomer('C8', ['bf', 'state'], {'state':['A']})        #active caspase 8
     Monomer('Bar', ['bC8'])       #bifunctional apoptosis regulator
     alias_model_components()
 
@@ -101,7 +101,7 @@ def CD95_to_SecondaryComplex():
     Initial(flip_L(bDED=None), flip_L_0)   #c-Flip[L]
     Initial(flip_S(bDED=None), flip_S_0)   #c-Flip[S]
     Initial(proC8(bDED=None), proC8_0)    #procaspase 8
-    Initial(C8(bC8=None), C8_0)       #caspase 8
+    Initial(C8(bf=None, state = 'A'), C8_0)       #caspase 8
     Initial(Bar(bC8=None), Bar_0)     #bifunctional apoptosis regulator
     
     # =========================================
@@ -158,10 +158,10 @@ def CD95_to_SecondaryComplex():
     bind(FADD(bDD = ANY, bDED2 = None, bDED1 = ANY), 'bDED2', proC8(bDED = None), 'bDED', [kf6, kr6])
     DISC_proC8 = CD95(blig=ANY, bDD=ANY) % Fas(blig=ANY) % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY) % proC8(bDED=ANY)%proC8(bDED=ANY)
     DISC = CD95(blig=ANY, bDD=ANY) % Fas(blig=ANY) % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)
-    Rule('C8_activation', FADD(bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED = ANY) >> FADD(bDED1 = None, bDED2 = None) + C8(bC8 = None), kc6)
+    Rule('C8_activation', FADD(bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED = ANY) >> FADD(bDED1 = None, bDED2 = None) + C8(bf = None, state = 'A'), kc6)
 
     # caspase 8 inhibition by BAR
-    bind(Bar(bC8 = None), 'bC8', C8(bC8 = None), 'bC8', [kf7, kr7])
+    bind(Bar(bC8 = None), 'bC8', C8(bf = None, state = 'A'), 'bf', [kf7, kr7])
     
     # release of secondary complex from the DISC
 
@@ -288,7 +288,7 @@ def TNFR1_to_SecondaryComplex():
     Rule('RIP1_deUb', RIP1(bDD=None, bRHIM = None, state='ub')>> RIP1(bDD=None, bRHIM = None, state='unmod'), kc21)
 
 def SecondaryComplex_to_Bid_monomers():
-    Monomer('Bid', ['bf', 'state'], {'state':['unmod', 'po4', 'trunc','M']})
+    #Monomer('Bid', ['bf', 'state'], {'state':['U', 'po4', 'T','M']})
     Monomer('BidK', ['bf']) #unknown Bid-kinase
     Monomer('RIP3', ['bRHIM', 'state'], {'state':['unmod', 'po4', 'trunc', 'N']})
     alias_model_components()
@@ -307,12 +307,12 @@ def SecondaryComplex_to_Bid():
         This model also produces Secondary complex, FADD:proC8:c-Flip.
         """
     Parameter('RIP3_0'  , 2.0e4) # molecules per cell
-    Parameter('Bid_0'   , 2.0e4) # 2.0e4 molecules per cell
+    #Parameter('Bid_0'   , 2.0e4) # 2.0e4 molecules per cell
     Parameter('BidK_0'  , 5.0e3) # molecules per cell
     alias_model_components()
     
     Initial(RIP3(bRHIM = None, state = 'unmod'), RIP3_0)   # RIP3
-    Initial(Bid(bf = None, state = 'unmod'), Bid_0)        # Bid
+    #Initial(Bid(bf = None, state = 'U'), Bid_0)        # Bid
     Initial(BidK(bf = None), BidK_0)
     # ==============================================================
     # Assembly of Complex II, Riptosome and Necrosome
@@ -347,7 +347,7 @@ def SecondaryComplex_to_Bid():
     Parameter('kr26', 1e-3) # Generic dessociation rate constant
     Parameter('kc26', 1e-1) # Generic catalytic rate constant
     Parameter('kc27', 1e-1) # Generic catalytic rate constant
-    Parameter('kc28', 1e-1) # Generic catalytic rate constant
+    Parameter('kc28', 1e-1) # Generic caatalytic rate constant
     Parameter('kf29', 1e-6) # Generic association rate constant
     Parameter('kr29', 1e-3) # Generic dessociation rate constant
     Parameter('kf30', 1e-6) # Generic association rate constant
@@ -379,9 +379,9 @@ def SecondaryComplex_to_Bid():
     CIIA = TRADD(bDD2 = None, bDD1 = ANY, state = 'active') %  FADD(bDD=ANY, bDED1=None, bDED2=None)
     RIP_CIIA_proC8 = RIP1(bDD=ANY, bRHIM = None, state = 'unmod')% TRADD(bDD2 = None, bDD1 = ANY, state = 'active') % FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)%proC8(bDED=ANY)%proC8(bDED=ANY)
     RIP_CIIB_proC8 = RIP1(bDD=ANY, bRHIM = None, state = 'unmod')% FADD(bDD=ANY, bDED1=ANY, bDED2=ANY)%proC8(bDED=ANY)%proC8(bDED=ANY)
-    Rule('RIP1_truncation_CIIA', RIP_CIIA_proC8 >> CIIA + C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
-    Rule('RIP1_truncation_CIIB', RIP_CIIB_proC8 >> FADD(bDD=None, bDED1=None, bDED2=None)+ C8(bC8=None) + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
-    catalyze_state(C8(bC8=None), 'bC8', RIP1(bDD=None), 'bRHIM', 'state', 'unmod', 'trunc', [kf26, kr26, kc26])
+    Rule('RIP1_truncation_CIIA', RIP_CIIA_proC8 >> CIIA + C8(bf = None, state = 'A') + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
+    Rule('RIP1_truncation_CIIB', RIP_CIIB_proC8 >> FADD(bDD=None, bDED1=None, bDED2=None)+ C8(bf = None, state = 'A') + RIP1(bDD=None, bRHIM = None, state = 'trunc'), kc25)
+    catalyze_state(C8(bf = None, state = 'A'), 'bf', RIP1(bDD=None), 'bRHIM', 'state', 'unmod', 'trunc', [kf26, kr26, kc26])
 
     #---Truncation by proC8:cFlip_L---------------------
     Riptosome_FADD = RIP1(bDD=1, bRHIM = None, state = 'unmod')%FADD(bDD=1, bDED1=ANY, bDED2=ANY)%proC8(bDED = ANY)%flip_L(bDED = ANY)
@@ -400,11 +400,11 @@ def SecondaryComplex_to_Bid():
     Rule('RIP3_binding2', Ripto2_Flip_S + RIP3(bRHIM= None, state = 'unmod') <> Necrosome2, kf30, kr30)
     
     #RIP3 Truncation
-    catalyze_state(C8(bC8=None), 'bC8', RIP3(), 'bRHIM', 'state', 'unmod', 'trunc', [kf31, kr31, kc31])
+    catalyze_state(C8(bf = None, state = 'A'), 'bf', RIP3(), 'bRHIM', 'state', 'unmod', 'trunc', [kf31, kr31, kc31])
 
     # Bid Phosphorylation and Truncation
-    catalyze_state(BidK(), 'bf', Bid(), 'bf', 'state', 'unmod', 'po4', [kf32, kr32, kc32])
-    catalyze_state(C8(bC8=None), 'bC8', Bid(), 'bf', 'state', 'unmod', 'trunc', [kf33, kr33, kc33])
+    catalyze_state(BidK(), 'bf', Bid(), 'bf', 'state', 'U', 'po4', [kf32, kr32, kc32])
+    catalyze_state(C8(bf = None, state = 'A'), 'bf', Bid(), 'bf', 'state', 'U', 'T', [kf33, kr33, kc33])
 
     # Bid-PO4 competing with RIP1 for binding to Complex II
     bind(TRADD(bDD2 = None, state = 'active'),'bDD2', Bid(bf = None, state = 'po4'), 'bf', [kf34, kr34])
@@ -809,7 +809,7 @@ def observables():
     Observable('RIP1_Bid', RIP1()%Bid())
     Observable('Bid_Riptosome1', Bid(bf= ANY)%FADD(bDD=ANY, bDED1=ANY, bDED2=ANY))
     Observable('Bid_Riptosome2', Bid(bf= ANY)%TRADD(bDD1=ANY, bDD2=ANY)%FADD(bDD=ANY, bDED1=ANY, bDED2=ANY))
-    Observable('Bid_Trunc', Bid(state='trunc'))
+    Observable('Bid_Trunc', Bid(state='T'))
     Observable('Bid_PO4', Bid(state='po4'))
     Observable('RIP1_Trunc', RIP1(state='trunc'))
     Observable('RIP3_Trunc', RIP3(state='trunc'))

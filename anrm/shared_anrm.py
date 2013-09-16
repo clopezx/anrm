@@ -3,10 +3,10 @@ Overview
 ========
 
 This module declares a number of functions and variables that are
-used by many of the EARM 2 models. The functions can be divided into the
-following four categories:
+used by many of the ANRM models. The functions can be divided into the
+following categories:
 
-1. Functions that are specific to the models in EARM 2, but are used by all of
+1. Functions that are specific to the models in ANRM 2, but are used by all of
    them. The only macro of this type is
 
    - :py:func:`observables`
@@ -20,15 +20,7 @@ following four categories:
    - :py:func:`assemble_pore_sequential`
    - :py:func:`pore_transport`
 
-3. Macros for mechanisms that appear within the models previously published by
-   the research group of Pingping Shen (or the model from [Howells2011]_, which
-   is derived from one of Shen's models):
-
-   - :py:func:`assemble_pore_spontaneous`
-   - :py:func:`displace`
-   - :py:func:`displace_reversibly`
-
-4. Macros for mechanisms that appear within the models described in our
+3. Macros for mechanisms that appear within the models described in our
    group's earlier work, specifically the models described in [Albeck2008]_:
 
    - :py:func:`catalyze_convert`
