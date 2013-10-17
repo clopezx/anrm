@@ -7,7 +7,7 @@ from pysb import *
 from pysb.util import alias_model_components
 from earm import shared
 
-from anrm import irvin_modules_v2 as irvin
+from anrm import irvin_modules_v3 as irvin
 from earm import lopez_modules as lopez 
 from earm import albeck_modules as albeck
 from anrm import merge
@@ -152,6 +152,7 @@ albeck.pore_to_parp()
 
 # From irvin_modules
 irvin.rip1_to_parp()
+#irvin.C3_inhibits_MLKL()
 
 # Observables
 irvin.observables()
