@@ -7,9 +7,11 @@ import numpy as np
 import pylab as p
 
 from pysb.integrate  import odesolve
-from anrm import irvin_AN_crosstalk
+#from anrm import irvin_AN_crosstalk
+from anrm import irvin_anrm_experiment_8
 
-m = irvin_AN_crosstalk.model
+m = irvin_anrm_experiment_8.model
+#m = irvin_AN_crosstalk.model
 t = np.linspace(0,10000,100)
 yout = odesolve(m, t)
 
