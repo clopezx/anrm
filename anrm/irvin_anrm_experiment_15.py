@@ -37,7 +37,7 @@ model.monomers = merged_monomers
     Apoptosis-Necrosis Reaction Network Model:
     
     Experimental conditions:
-    1) Fas sensitive cells.
+    1) TNFa sensitive cells.
     2) cFlip competes with procaspase for binding to FADD
     3) NFkB mediated cFlip expression
     4) cFlip-L can cleave Bid, but with lower efficiency
@@ -54,7 +54,7 @@ irvin.TNFR1_to_ComplexII_Initials()
 irvin.SecondaryComplex_to_Bid_initials()
 irvin.rip1_to_MLKL_initials()
 
-irvin.CD95_to_SecondaryComplex() #1
+irvin.TNFR1_to_ComplexI() #1
 irvin.FADD_to_C8()
 irvin.cFlip_competitive_inhibition() #2
 irvin.NFkB_cFlip_interaction() #3

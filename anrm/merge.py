@@ -53,6 +53,31 @@ class Edit_Monomers(object):
     
         return merged_monomers
 
+class Edit_Parameters(object):
+    def __init__(self, all_parameters, edits):
+        self.less_parameters = self.del_edit_parameters(all_parameters, edits)
+        self.merged_parameters = self.merge_parameters(self.less_parameters, edits)
+
+    def del_edit_parameters(self, all_parameters, edits):
+        #remove duplicate monomers from all of the models' ComponentSets
+        less_parameters = all_parameters
+        parameters_names = all_parameters.keys()
+        for j in edits.keys():
+            parameters_index = less_parameters._index_map[j]
+            to_remove = less_parameters[parameters_index:parameters_index+1]
+            less_parameters = less_parameters - to_remove
+        
+        return less_parameters
+
+    def merge_parameters(self, less_parameters, new):
+        from pysb.core import ComponentSet
+
+        merged_parameters = ComponentSet()
+        merged_parameters |= less_parameters
+        merged_parameters |= new
+            
+        return merged_parameters
+
 class Edit_Rules(object):
     def __init__(self, all_rules, edits):
         self.less_rules   = self.del_edit_rules(all_rules, edits)

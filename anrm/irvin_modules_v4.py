@@ -2,33 +2,23 @@
     Overview
     ========
     
-    PySB implementations of the apoptosis-necrosis reaction model version 1.0
+    PySB implementations of the apoptosis-necroptosis reaction model version 1.0
     (ANRM 1.0) originally published in [Irvin,NECRO2013]_.
     
     This model provides information about the dynamic biomolecular events that
-    commit a cell to apoptosis or necrosis in response to TNFa or Fas signalling.
-    PARP1 () serves, in this case, as a marker for apoptosis or necrosis. In
-    apoptosis, PARP1 is cleaved whereas in necroptosis it is activated [].
+    commit a cell to apoptosis or necroptosis in response to TNFa signalling.
+    PARP1 cleavage or activity serves, in this case, as a marker for apoptosis 
+    or necrosis respectively. An alternate marker for necroptosis
     
-    This file contains functions that implement the extrinsic apoptosis pathway
-    and activation of a necroptosis reporter protein, PARP. 
+    This file contains functions that implement the parts of the extrinsic apoptosis
+    pathway and activation of a necroptosis reporter proteins, PARP and MLKL. 
+    
     The modules are organized into three overall sections:
-    - Receptor signalling and Bid activation.
-    - Pore formation
-    - PARP activitation/cleavage.
+    - ...
 
     These sections are further devided into...
     For receptor signalling and Bid activation:
-    -- CD95 Ligation to formation of secondary complex
-    -- TNFR1 ligation to formation of complex II
-    -- Secondary complexes to formation of Riptosomes and Necrosomes and Bid
-    activation.
-    -- Bid translocation of the mitochondria and inhibition of anti-apoptotics
-    For pore formation
-    -- Lopez Pore formation (Adapted from Lopez Module)
-    For PARP activation/cleavage
-    -- Pore to PARP
-    -- RIP1 to PARP
+    --...
     
     These modules are to be run in cooperation with Lopez Momp_monomers and Albeck Apaf_to_Parp modules.
     
@@ -49,68 +39,89 @@ from pysb.macros import *
 # ===========================
 # This contains FasL binding and assembly of the DISC
 
-def Momomers_FasL_to_DISC():
+def TNFa_to_ComplexI_Monomers():
     
-    """ Declares Fas ligand, CD95, FADD, Flip_L, Flip_S procaspase8 and Caspase 8. 
-    
-    bf' is the site to be used for all binding reactions.
+    """ Declares TNFa, TNFR1, TRADD, RIP1, TRAF2, IAP, NKS (NFkB signaling complex),
+    NFkB, CYLD and FADD. Binding sites are named after (when known) subdomains that
+    facilitate binding. Otherwise the binding site will reflect what it binds with.
         
     The 'state' site denotes various localization and/or activity states of a
     Monomer, with 'C' denoting cytoplasmic localization and 'M' mitochondrial
     localization.
     """
-    Monomer('FasL', ['blig'])    #Fas Ligand
-    Monomer('Fas', ['blig', 'bDD'])           #Fas Receptor (CD95)
+    Monomer('TNFa'  ,   ['brec'])           #TNFa
+    Monomer('TNFR1' ,   ['blig', 'bDD'])    #TNFR1
+    Monomer('TRADD' ,   ['bDD1', 'bDD2'])   #TRADD
+    Monomer('RIP1'  ,   ['bDD', 'btraf', 'state'], {'state':['unmod', 'ub']})   #RIP1
+    Monomer('TRAF'  ,   ['brip', 'bciap', 'zfinger'])   #TRAF2
+    Monomer('cIAP'  ,   ['btraf'])          #cIAP 1 and 2
+    Monomer('NSC'   ,   ['bnfkb'])          #Recruitement of LUBAC commits complex I to the NFkB activation pathway. This pathway is approximated by a single activation step which is carried out by a NFkB signaling complex (NSC). 
+    Monomer('NFkB'  ,   ['bnsc','state'], {'state':['I', 'A']})       #NFkB
+    Monomer('CYLD'  ,   ['btraf'])  #CYLD
     Monomer('FADD', ['bDD', 'bDED1','bDED2'])    #FADD
-    Monomer('flip_L', ['bDED'])   #c-Flip[L] binds FADD at DED2
-    Monomer('flip_S', ['bDED'])   #c-Flip[S] binds FADD at DED2
-    Monomer('proC8', ['bDED'])    #procaspase 8 binds FADD at DED1 or DED2
-    Monomer('C8', ['bf', 'state'], {'state':['A', 'I']})        #active caspase 8
-    Monomer('Bar', ['bC8'])       #bifunctional apoptosis regulator
     alias_model_components()
 
-def Initials_Fas_to_DISC():
-    Parameter('FasL_0'  ,   6000) # 6000 corresponds to 100ng/ml Fas (J Immunol 2005)
-    Parameter('Fas_0'   ,   4817) # 4817receptors per cell (J Immunol 2005)
+def TNFa_to_ComplexI_Initials():
+    Parameter('TNFa_0'  ,  6000) # 6000 corresponds to 100ng/ml TNFa
+    Parameter('TNFR1_0' ,  4800) # 4800 receptors per cell
+    Parameter('TRADD_0' ,  9000) # molecules per cell (arbitrarily assigned) 9000
+    Parameter('RIP1_0'  , 12044) # molecules per cell (arbitrarily assigned) 12044
+    Parameter('TRAF_0'  ,  9000) # molecules per cell (arbitrarily assigned) 9000
+    Parameter('cIAP_0'  ,  9000) # molecules per cell (arbitrarily assigned) 9000
+    Parameter('NSC_0'   ,     0) # complexes per cell
+    Parameter('NFkB_0'    , 50000) # molecules per cell (arbitrarily assigned) 50000
+    Parameter('CYLD_0'  ,  9000) # molecules per cell
     Parameter('FADD_0'  ,   8030) # 8300 molecules per cell (J Immunol 2005)
-    Parameter('flip_L_0',  39022) # 39022 molecules per cell (J Immunol 2005)
-    Parameter('flip_S_0',  39022) # molecules per cell assummed both isoforms w/conc.
-    Parameter('proC8_0' ,  16057) # procaspase 8 molecules per cell 16057 (J Immunol 2005)
-    Parameter('C8_0'    ,      0) # active caspase 8 dimers per cell.
-    Parameter('Bar_0'   ,  1.0e3) # Bar molecules per cell. (Hela Cells)
     alias_model_components()
     
-    Initial(FasL(blig=None), FasL_0)       #Fas Ligand
-    Initial(Fas(blig=None, bDD=None), Fas_0)     #Fas Receptor (CD95)
-    Initial(FADD(bDD=None, bDED1=None, bDED2=None), FADD_0) #FADD
-    Initial(flip_L(bDED=None), flip_L_0)   #c-Flip[L]
-    Initial(flip_S(bDED=None), flip_S_0)   #c-Flip[S]
-    Initial(proC8(bDED=None), proC8_0)    #procaspase 8
-    Initial(C8(bf=None, state = 'A'), C8_0)       #caspase 8
-    Initial(Bar(bC8=None), Bar_0)     #bifunctional apoptosis regulator
+    Initial(TNFa(brec=None), TNFa_0)       
+    Initial(TNFR1(blig=None, bDD=None), TNFR1_0)
+    Initial(TRADD(bDD1=None, bDD2=None), TRADD_0)
+    Initial(RIP1(bDD=None, btraf=None, state = 'unmod'), RIP1_0)
+    Initial(TRAF(brip=None, bciap=None, zfinger=None), TRAF_0)
+    Initial(cIAP(btraf=None), cIAP_0)
+    Initial(NSC(bnfkb=None), NSC_0)
+    Initial(NFkB(bnsc=None, state = 'I'), NFkB_0)
+    Initial(CYLD(btraf=None),CYLD_0)
+    Initial(FADD(bDD=None, bDED1=None, bDED2=None), FADD_0)
 
-def CD95_to_SecondaryComplex():
-    """Defines the interactions of Fas ligation assembly of the DISC as per ANRM 1.0.
-        
-    Uses FasL, Fas, and FADD,monomers and their associated parameters to generate rules that 
-    describe the ligand/receptor binding and FADD recruitment. Although proC8 and c-Flip
-    are part of the DISC, their recruitment to FADD occurs at the DISC, 2o Complex and 
-    Complex II. Therefore, I will cover it in separate module. 
+def TNFa_to_ComplexI():
+    """Reaction network that produces Complex I and activates NFkB. Instead of including conversion step. 
     """
+    bind(TNFa(brec = None),'brec', TNFR1(blig = None), 'blig', [1e-6, 1e-3])
+    bind(TNFR1(blig = ANY, bDD = None), 'bDD', TRADD(bDD1 = None, bDD2 = None), 'bDD1', [1e-6, 1e-3])
+    bind(TNFR1(blig = ANY, bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = None), 'bDD2', RIP1(bDD = None, btraf = None, state =  'unmod'), 'bDD', [1e-6, 1e-3])
+    bind(TNFa(brec = ANY)%TNFR1(blig =  ANY, bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = ANY)%RIP1(bDD = ANY, btraf = None, state =  'unmod'), 'btraf', TRAF(brip=None), 'brip', [1e-6, 1e-3])
+    bind(TRAF(bciap =  None), 'bciap', cIAP(btraf = None), 'btraf', [1e-6, 1e-3])
+    bind(TRAF(zfinger =  None), 'zfinger', CYLD(btraf = None), 'btraf', [1e-6, 1e-3])
+    
+    #Make these aliases.
+    ComplexI = TNFa(brec = ANY)%TNFR1(blig =  ANY, bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = ANY)
+    
+    rule('RIP1_Ubiquitination', ComplexI %RIP1(bDD = ANY, btraf = None, state =  'unmod')%TRAF(brip = ANY, bciap = ANY) >> ComplexI %RIP1(bDD = ANY, btraf = None, state =  'ub')%TRAF(brip = ANY, bciap = ANY), Parameter('RIP1_ubiq_kc', 1e-1))
+    rule('RIP1_Deubiquitination', ComplexI%RIP1(bDD = ANY, btraf = None, state =  'ub')%TRAF(brip = ANY, bciap = ANY) >> ComplexI%RIP1(bDD = ANY, btraf = None, state =  'unmod')%TRAF(brip = ANY, zfinger = ANY), Parameter('RIP1_deub_kc', 1e-1))
+    rule('Establish_NFkB_Signaling_Complex', ComplexI%RIP1(bDD = ANY, btraf = None, state =  'ub')%TRAF(brip = ANY, bciap = ANY) >> NSC(bnfkb=None), Parameter('NSC_esta_kc', 1e-1))
+    rule('RIP1_Degradation', ComplexI%RIP1(bDD = ANY, btraf = None, state =  'ub')%TRAF(brip = ANY) >> ComplexI + TRAF(brip = None), Parameter('RIP1_degr_kc', 1e-1))
 
-    # ====================================
-    # FasL_to_DISC
-    # ------------------------------------
-    #   Fas + CD95 <-> Fas:CD95
-    #   Fas:CD95 + FADD <-> Fas:CD95:FADD
+def CompI_TRADD_RIP1_Dissociation():
+    """Some believe that TRADD, RIP1 and others are released into the cytoplasm after RIP1 deubiquitination or after TNFR endocytosis. This mechanism presents a problem: The RIP1 released into the cytoplasm is in theory the same as RIP1 that existed in the cytoplasm prior to TNF stimulation. Meaning apoptosis whould spontaneously occur. Dissociation of TRADD:RIP1 from complex I is a hypothetical pathway that could distinguish pre- and post- TNF RIP1. It could also serve as a mechanism for FADD independent necrosome formation. This hypothesis is supported by a suggested mechanism, to explain signal transduction from TNFa to Riptosome formation[1]. 
+        
+        1. Dickens, LS., IR Powley, MA Hughes, M MacFarlane, Exp. Cell. Res. 318 (2012) 1269-1277"""
+    
+    bind(TNFa(brec = ANY)%TNFR1(blig =  ANY, bDD = None), 'bDD', TRADD(bDD1 = None, bDD2 = ANY)%RIP1(bDD = ANY, state =  'unmod'), 'bDD1', [1e-6, 1e-3])
 
-    #-----------DISC assembly-------------
-    alias_model_components()
-    bind(FasL(blig=None), 'blig',  Fas(blig = None, bDD = None), 'blig', [1.89e-7, 1e-4])
-    bind(Fas(blig = ANY, bDD = None), 'bDD', FADD(bDD = None, bDED1 =None, bDED2 = None), 'bDD', [1.04e-6, 0.2]) # (J Immunol 2005)
+def CompII_Hypothesis_1():
+    """Michaeu and Tschopp, showed that FADD is absent from Complex I[1]. The presence of TRADD in Complex II is debated [2]. As explained in CompI_TRADD_RIP1_Dissociation(), simply releasing RIP1 from Complex I so that it can bind FADD creates a condition where cell death spontaneously occurs. Here, I hypothesize that FADD transiently associates with Complex I in order to retrieve RIP1 from Complex I. This association, being transient, would have been difficult to detect.
+        
+        1. Olivier Micheau, Jurg Tschopp, Induction of TNF Receptor I-Mediated Apoptosis via Two Sequential Signaling Complexes, Cell, Volume 114, Issue 2, 25 July 2003, Pages 181-190
+        
+        2. Dickens, LS., IR Powley, MA Hughes, M MacFarlane, "The 'complexities' of life and death: Death receptor signalling platforms" Exp. Cell. Res. 318 (2012) 1269-1277"""
 
-    #-----------Release Secondary Complex from DISC------------
-    bind(Fas(blig = ANY, bDD = None), 'bDD', FADD(bDD = None, bDED1 =ANY, bDED2 = ANY), 'bDD', [1.04e-10, 1]) # (J Immunol 2005)
+    TNFR1(bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = ANY)%RIP1(bDD = ANY)%TRAF2(brip = ANY) + FADD(bDD = None)>> TNFR1(bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = None) + RIP1(bDD1 = ANY)%FADD(bDD = ANY) + TRAF2(brip = None)
+    
+    TNFR1(bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = ANY)%RIP1(bDD = ANY)+ FADD(bDD = None)>> TNFR1(bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = None) + RIP1(bDD1 = ANY)%FADD(bDD = ANY)
+    
+
 
 def FADD_to_C8():
     """Defines the interactions of procaspase 8 and/or cFlip recruitment to FADD as per
