@@ -86,7 +86,21 @@ def TNFa_to_ComplexI_Initials():
     Initial(FADD(bDD=None, bDED1=None, bDED2=None), FADD_0)
 
 def TNFa_to_ComplexI():
-    """Reaction network that produces Complex I and activates NFkB. Instead of including conversion step. 
+    """Reaction network that produces Complex I and activates NFkB [1]. Recruitment of LUBAC and NFkB pathway components to complex I is approximated by a one-step conversion to "NFkB Signaling Complex" (reaction 7). A20 ubiquitylates RIP1 and targets it for degradation. The action of A20 is apporixmated at a single reaction (reaction 8). 
+        
+        1. TNFa + TNFR1 <> TNFa:TNFR1
+        2. TNFa:TNFR1 + TRADD <> TNFa:TNFR1:TRADD
+        3. TNFa:TNFR1:TRADD + RIP1(unmod) <> TNFa:TNFR1:TRADD:RIP1(unmod)
+        4. TNFa:TNFR1:TRADD:RIP1(unmod) + TRAF2 <> TNFa:TNFR1:TRADD:RIP1(unmod):TRAF2
+        5. TNFa:TNFR1:TRADD:RIP1(unmod):TRAF2 + cIAP <> TNFa:TNFR1:TRADD:RIP1(unmod):TRAF2:cIAP
+        
+        6. TNFa:TNFR1:TRADD:RIP1(unmod):TRAF2:cIAP >>TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2:cIAP
+        7. TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2 >> NFkB Signaling Complex
+        8. TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2 >> TNFa:TNFR1:TRADD + TRAF2 
+        9. TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2 + CYLD <> TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2:CYLD
+        10.TNFa:TNFR1:TRADD:RIP1(poly-ubiquitylated):TRAF2:CYLD >> TNFa:TNFR1:TRADD:RIP1(unmod):TRAF2:CYLD
+        
+        1. Olivier Micheau, Jurg Tschopp, Induction of TNF Receptor I-Mediated Apoptosis via Two Sequential Signaling Complexes, Cell, Volume 114, Issue 2, 25 July 2003, Pages 181-190
     """
     bind(TNFa(brec = None),'brec', TNFR1(blig = None), 'blig', [1e-6, 1e-3])
     bind(TNFR1(blig = ANY, bDD = None), 'bDD', TRADD(bDD1 = None, bDD2 = None), 'bDD1', [1e-6, 1e-3])
@@ -96,7 +110,6 @@ def TNFa_to_ComplexI():
     bind(TRAF(bciap =  None), 'bciap', cIAP(btraf = None), 'btraf', [1e-6, 1e-3])
     bind(TRAF(zfinger =  None), 'zfinger', CYLD(btraf = None), 'btraf', [1e-6, 1e-3])
     
-    #Make these aliases.
     ComplexI = TNFa(brec = ANY)%TNFR1(blig =  ANY, bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = ANY)
     
     Rule('RIP1_Ubiquitination', ComplexI %RIP1(bDD = ANY, btraf = ANY, state =  'unmod')%TRAF(brip = ANY, bciap = ANY) >> ComplexI %RIP1(bDD = ANY, btraf = None, state =  'ub')%TRAF(brip = ANY, bciap = ANY), Parameter('RIP1_ubiq_kc', 1e-1))
@@ -106,6 +119,8 @@ def TNFa_to_ComplexI():
 
 def CompI_TRADD_RIP1_Dissociation():
     """Some believe that TRADD, RIP1 and others are released into the cytoplasm after RIP1 deubiquitination or after TNFR endocytosis. This mechanism presents a problem: The RIP1 released into the cytoplasm is in theory the same as RIP1 that existed in the cytoplasm prior to TNF stimulation. Meaning apoptosis whould spontaneously occur. Dissociation of TRADD:RIP1 from complex I is a hypothetical pathway that could distinguish pre- and post- TNF RIP1. It could also serve as a mechanism for FADD independent necrosome formation. This hypothesis is supported by a suggested mechanism, to explain signal transduction from TNFa to Riptosome formation[1]. 
+        
+        TNFa:TNFR1:TRADD:RIP1(unmod) <> TNFa:TNFR1 + TRADD:RIP1(unmod)
         
         1. Dickens, LS., IR Powley, MA Hughes, M MacFarlane, Exp. Cell. Res. 318 (2012) 1269-1277"""
     
@@ -120,14 +135,14 @@ def CompII_Hypothesis_1():
 
     Rule('TNFR1_to_FADD_1', TNFR1(bDD = 2)%TRADD(bDD1 = 2, bDD2 = 3)%RIP1(bDD = 3, btraf = 4)%TRAF(brip = 4) + FADD(bDD = None)>> TNFR1(bDD = 2)%TRADD(bDD1 = 2, bDD2 = None) + RIP1(bDD = 1, btraf = None)%FADD(bDD = 1) + TRAF(brip = None), Parameter('TNFR1_FADD_kc_1', 1e-1))
     
-    Rule('TNFR1_to_FADD_2', TNFR1(bDD = 2)%TRADD(bDD1 = ANY, bDD2 = ANY)%RIP1(bDD = ANY)+ FADD(bDD = None)>> TNFR1(bDD = ANY)%TRADD(bDD1 = ANY, bDD2 = None) + RIP1(bDD = 1)%FADD(bDD = 1), Parameter('TNFR1_FADD_kc_2', 1e-1))
+    Rule('TNFR1_to_FADD_2', TNFR1(bDD = 2)%TRADD(bDD1 = 2, bDD2 = 3)%RIP1(bDD = 3, btraf = None)+ FADD(bDD = None)>> TNFR1(bDD = 2)%TRADD(bDD1 = 2, bDD2 = None) + RIP1(bDD = 1, btraf = None)%FADD(bDD = 1), Parameter('TNFR1_FADD_kc_2', 1e-1))
 
 def CompII_Hypothesis_2():
     """Dickens et al, speculated that TRADD:RIP1 is released into the cytoplasm following RIP1 deubiquitination by CYLD[1]. Furter, Dinckens question presence of TRADD in Complex II[1], but it is established that Complex II is contains FADD. To model these findings, we suggest that FADD replaces the TRADD in the cytoplasmic TRADD:RIP1 complex. """
         
-    Rule('TRADD_to_FADD_1', TRADD(bDD1 = None, bDD2 = ANY)%RIP1(bDD = ANY)%TRAF(brip = ANY) + FADD(bDD = None)>> TRADD(bDD1 = ANY, bDD2 = None) + RIP1(bDD = 1)%FADD(bDD = 1) + TRAF(brip = None), Parameter('TRADD_FADD_kc_1', 1e-1))
+    Rule('TRADD_to_FADD_1', TRADD(bDD1 = None, bDD2 = 2)%RIP1(bDD = 2)%TRAF(brip = 3) + FADD(bDD = None)>> TRADD(bDD1 = None, bDD2 = None) + RIP1(bDD = 1)%FADD(bDD = 1) + TRAF(brip = None), Parameter('TRADD_FADD_kc_1', 1e-1))
     
-    Rule('TRADD_to_FADD_2', TRADD(bDD1 = None, bDD2 = ANY)%RIP1(bDD = ANY, btraf = None)+ FADD(bDD = None)>> TRADD(bDD1 = ANY, bDD2 = None) + RIP1(bDD = 1, btraf = None)%FADD(bDD = 1), Parameter('TRADD_FADD_kc_2', 1e-1))
+    Rule('TRADD_to_FADD_2', TRADD(bDD1 = None, bDD2 = 2)%RIP1(bDD = 2, btraf = None)+ FADD(bDD = None)>> TRADD(bDD1 = None, bDD2 = None) + RIP1(bDD = 1, btraf = None)%FADD(bDD = 1), Parameter('TRADD_FADD_kc_2', 1e-1))
 
 def CompII_Hypothesis_3():
     """Dickens et al, speculated that TRADD:RIP1 is released into the cytoplasm following RIP1 deubiquitination by CYLD[1]. FADD is recruited to RIP1 to form a cytoplasmic complex II. The presence of TRADD in complex II is debated. Here, we hypothesize that it is present. """
@@ -191,33 +206,36 @@ def ComplexIIa_Assembly():
 def ComplexIIb_to_MLKL():
     """Necrosome formation and MLKL activation"""
     bind(RIP1(bDD = ANY, bRHIM = None, state = 'unmod'), 'bRHIM', RIP3(bRHIM = None, state = 'unmod'), 'bRHIM', [1e-6, 1e-3])
-    Rule('Rip_PO4lation', RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state='unmod') >> RIP1(bRHIM=ANY, state = 'po4')%RIP3(bRHIM=ANY, state = 'po4'), Parameter('k19', 1e-1))
+    
+    Rule('Rip3_PO4lation', RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state='unmod') >> RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state = 'po4'), Parameter('k19', 1e-2))
+    Rule('Rip1_PO4lation', RIP1(bRHIM=ANY, state = 'unmod')%RIP3(bRHIM=ANY, state='po4') >> RIP1(bRHIM=ANY, state = 'po4')%RIP3(bRHIM=ANY, state = 'po4'), Parameter('k20', 1e-3))
+    
     catalyze_state(RIP1(state='po4'), 'bMLKL', MLKL(), 'bRHIM', 'state', 'unmod', 'active', [1e-6,1e-3, 1e-1])
-    catalyze_state(MLKL(state='active'), 'bRHIM', MLKL(), 'bRHIM', 'state', 'unmod', 'active', [1e-7, 0.2, 0.01])
+    catalyze_state(MLKL(state='active'), 'bRHIM', MLKL(), 'bRHIM', 'state', 'unmod', 'active', [1e-7, 0.4, 0.01])
 
 def RIP1_truncation_ComplexII():
     #Flip_L:proC8 mediated RIP1 truncation
     Rule('RIP1_trunc_1a', RIP1(bDD = None, state = 'unmod') + FADD(bDD = None, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) <> RIP1(bDD = 1, state = 'unmod')%FADD(bDD = 1, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kcf1', 1e-6), Parameter('RIP1_trunc_kcr1', 1e-3))
 
-    Rule('RIP1_trunc_1b', RIP1(bDD = ANY, state = 'unmod')%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) >> RIP1(bDD = None, state = 'trunc') + FADD(bDD = None, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kc1', 1e-1))
+    Rule('RIP1_trunc_1b', RIP1(bDD = 1, state = 'unmod')%FADD(bDD = 1, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) >> RIP1(bDD = None, state = 'trunc') + FADD(bDD = None, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kc1', 1e-1))
 
-    Rule('RIP1_trunc_2a', RIP1(bDD = None, state = 'unmod') + TRADD(bDD1 = ANY, bDD2 = None)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) <> RIP1(bDD = 1, state = 'unmod')%TRADD(bDD1 = ANY, bDD2 = 1)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kcf2', 1e-6), Parameter('RIP1_trunc_kcr2', 1e-3))
+    Rule('RIP1_trunc_2a', RIP1(bDD = None, state = 'unmod') + TRADD(bDD1 = 2, bDD2 = None)%FADD(bDD = 2, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) <> RIP1(bDD = 1, state = 'unmod')%TRADD(bDD1 = 2, bDD2 = 1)%FADD(bDD = 2, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kcf2', 1e-6), Parameter('RIP1_trunc_kcr2', 1e-3))
 
     Rule('RIP1_trunc_2b', RIP1(bDD = ANY, state = 'unmod')%TRADD(bDD1 = ANY, bDD2 = ANY)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY) >> RIP1(bDD = None, state = 'trunc') + TRADD(bDD1 = ANY, bDD2 = None)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%flip_L(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kc2', 1e-1))
 
-    #proC8:proC8 meidated RIP1 truncation
-    Rule('RIP1_trunc_3a', RIP1(bDD = None, state = 'unmod') + FADD(bDD = None, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY) <> RIP1(bDD = 1, state = 'unmod')%FADD(bDD = 1, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kcf3', 1e-6), Parameter('RIP1_trunc_kcr3', 1e-3))
+    #proC8:proC8 mediated RIP1 truncation
+    Rule('RIP1_trunc_3a', RIP1(bDD = None, state = 'unmod') + FADD(bDD = None, bDED1 = 2, bDED2 = 3)%proC8(bDED=2)%proC8(bDED=3) <> RIP1(bDD = 1, state = 'unmod')%FADD(bDD = 1, bDED1 = 2, bDED2 = 3)%proC8(bDED=2)%proC8(bDED=3), Parameter('RIP1_trunc_kcf3', 1e-6), Parameter('RIP1_trunc_kcr3', 1e-3))
 
     Rule('RIP1_trunc_3b', RIP1(bDD = ANY, state = 'unmod')%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY) >> RIP1(bDD = None, state = 'trunc') + FADD(bDD = None, bDED1 = None, bDED2 = None) + C8(bf = None, state = 'A'), Parameter('RIP1_trunc_kc3', 1e-1))
 
-    Rule('RIP1_trunc_4a', RIP1(bDD = None, state = 'unmod') + TRADD(bDD1 = ANY, bDD2 = None)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY) <> RIP1(bDD = 1, state = 'unmod')%TRADD(bDD1 = ANY, bDD2 = 1)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY), Parameter('RIP1_trunc_kcf4', 1e-6), Parameter('RIP1_trunc_kcr4', 1e-3))
+    Rule('RIP1_trunc_4a', RIP1(bDD = None, state = 'unmod') + TRADD(bDD1 = 2, bDD2 = None)%FADD(bDD = 2, bDED1 = 3, bDED2 = 4)%proC8(bDED=3)%proC8(bDED=4) <> RIP1(bDD = 1, state = 'unmod')%TRADD(bDD1 = 2, bDD2 = 1)%FADD(bDD = 2, bDED1 = 3, bDED2 = 4)%proC8(bDED=3)%proC8(bDED=4), Parameter('RIP1_trunc_kcf4', 1e-6), Parameter('RIP1_trunc_kcr4', 1e-3))
 
     Rule('RIP1_trunc_4b', RIP1(bDD = ANY, state = 'unmod')%TRADD(bDD1 = ANY, bDD2 = ANY)%FADD(bDD = ANY, bDED1 = ANY, bDED2 = ANY)%proC8(bDED=ANY)%proC8(bDED=ANY) >> RIP1(bDD = None, state = 'trunc') + TRADD(bDD1 = ANY, bDD2 = None)%FADD(bDD = ANY, bDED1 = None, bDED2 = None)+ C8(bf = None, state = 'A'), Parameter('RIP1_trunc_kc4', 1e-1))
 
     # Caspase 8 activation
     Rule('C8_activation1', FADD(bDD = None, bDED2 = ANY, bDED1 = ANY)%proC8(bDED = ANY)%proC8(bDED = ANY) >> FADD(bDD = None, bDED1 = None, bDED2 = None) + C8(bf = None, state = 'A'), Parameter('kc_c8_1', 1))
 
-    Rule('C8_activation2', TRADD(bDD1 = None, bDD2 = ANY)%FADD(bDD = ANY, bDED2 = ANY, bDED1 = ANY)%proC8(bDED = ANY)%proC8(bDED = ANY) >> TRADD(bDD1 = None, bDD2 = ANY)%FADD(bDD = ANY, bDED1 = None, bDED2 = None) + C8(bf = None, state = 'A'), Parameter('kc_c8_2', 1))
+    Rule('C8_activation2', TRADD(bDD1 = None, bDD2 = 1)%FADD(bDD = 1, bDED2 = ANY, bDED1 = ANY)%proC8(bDED = ANY)%proC8(bDED = ANY) >> TRADD(bDD1 = None, bDD2 = 1)%FADD(bDD = 1, bDED1 = None, bDED2 = None) + C8(bf = None, state = 'A'), Parameter('kc_c8_2', 1))
 
 def C8_catalyzed_truncations():
     
@@ -232,10 +250,10 @@ def C8_catalyzed_truncations():
     catalyze_state(C8(bf = None, state = 'A'), 'bf', RIP3(), 'bRHIM', 'state', 'unmod', 'trunc', [1e-6, 1e-3, 1e-1])
     
     #Bid Truncation
-    catalyze_state(C8(bf = None, state = 'A'), 'bf', Bid(), 'bf', 'state', 'U', 'T', [1.04e-5, 0.005, 0.1])
+    catalyze_state(C8(bf = None, state = 'A'), 'bf', Bid(), 'bf', 'state', 'U', 'T', [1.e-6, 0.001, 0.1])
 
     #CYLD Truncation
-    catalyze_state(C8(bf = None, state = 'A'), 'bf', CYLD(), 'btraf', 'state', 'U', 'T', [1.04e-5, 0.005, 0.1])
+    catalyze_state(C8(bf = None, state = 'A'), 'bf', CYLD(), 'btraf', 'state', 'U', 'T', [1e-6, 1e-3, 0.1])
 
 def NFkB_Activation_and_Signaling_monomers():
     Monomer('Flip_L_degradase', ['bf'])

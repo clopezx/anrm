@@ -9,7 +9,7 @@ import simulator_1_0 as sim
 import bayes_mcmc as bmc
 import matplotlib.pyplot as plt
 
-from anrm.irvin_anrm_experiment_16 import model
+from anrm.irvin_mod_v4_tester import model
 
 #----Experimental Data----
 """
@@ -26,9 +26,6 @@ from anrm.irvin_anrm_experiment_16 import model
     prior:
     step:
 """
-
-ydata = pickle.load(open('Zinkel_Data.pkl'))
-init_conc = pickle.load(open('Zinkel_Conditions.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -89,7 +86,7 @@ def step(mcmc):
 
 #----Data and conditions----
 ydata = ydata_fn()
-init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM 
+init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
 
 #----Normalize--------------
 ynorm = ydata.copy()
