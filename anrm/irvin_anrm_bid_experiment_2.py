@@ -44,8 +44,7 @@ model.monomers = merged_monomers
     5) RIP1 Hypothesis 2: RIP1-unmod =! RIP1-deub
         5a) RIP1 de-ubiquitination in the 2o complex
         5a) TRADD can bind RIP1-unmod as well as RIP1-deub
-    6) Bid-po4 sequesters RIP1
-    7) C3 inhibits MLKL
+    6) Bid-po4 sequesters RIP1, Bid-po4:RIP1 recruits proC8 and facilitates cleavage of RIP1
     
     """
 # From irvin_modules
@@ -67,9 +66,10 @@ irvin.RIP1_deubiqutination_Hypothesis_1()#5a
 irvin.RIP1_to_SecondaryComplex()
 irvin.RIP1_truncation()
 irvin.Bid_Hypothesis() #6
+irvin.Bid_RIP_recruits_proC8()#
+irvin.Bid_RIP_proC8_truncation()#6
 irvin.C8_catalyzed_truncations()
 irvin.rip1_to_MLKL()
-irvin.C3_inhibits_MLKL()#7
 
 # From lopez_modules
 lopez.declare_initial_conditions()

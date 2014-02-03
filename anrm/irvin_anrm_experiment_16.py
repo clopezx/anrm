@@ -16,7 +16,8 @@ def compile_monomers():
     irvin.TNFR1_to_ComplexII_monomers()
     irvin.SecondaryComplex_to_Bid_monomers()
     irvin.rip1_to_MLKL_monmers()
-
+    irvin.Momomers_zVad_to_C8()
+    
     # From lopez_modules
     lopez.momp_monomers()
 
@@ -26,7 +27,8 @@ def compile_monomers():
 
 revised_monomers = {'Bid' :(['bf', 'state'], {'state':['U', 'T', 'M', 'po4']}),
     'C6'  :(['bf1','bf2', 'state'], {'state':['pro', 'A']}),
-    'PARP':(['bf', 'state'], {'state':['U', 'C', 'A']})}
+    'PARP':(['bf', 'state'], {'state':['U', 'C', 'A']}),
+    'C3': (['bf', 'state'], {'state':['pro', 'A', 'ub', 'I']})}
 
 monomer_edits = merge.Edit_Monomers(compile_monomers(), revised_monomers)
 merged_monomers = monomer_edits.merged_monomers
@@ -45,7 +47,7 @@ model.monomers = merged_monomers
         5a) RIP1 de-ubiquitination in the 2o complex
         5a) TRADD can bind RIP1-unmod as well as RIP1-deub
     6) Bid-po4 sequesters RIP1
-    7) C3 inhibits MLKL
+    7) Z-VAD inhibits active C8 and C3 by irreversibly binding to their catalytic sites.
     
     """
 # From irvin_modules
@@ -53,6 +55,7 @@ irvin.Initials_Fas_to_DISC()
 irvin.TNFR1_to_ComplexII_Initials()
 irvin.SecondaryComplex_to_Bid_initials()
 irvin.rip1_to_MLKL_initials()
+irvin.Initials_zVad_to_C8() #7
 
 irvin.TNFR1_to_ComplexI() #1
 irvin.FADD_to_C8()
@@ -69,7 +72,7 @@ irvin.RIP1_truncation()
 irvin.Bid_Hypothesis() #6
 irvin.C8_catalyzed_truncations()
 irvin.rip1_to_MLKL()
-irvin.C3_inhibits_MLKL()#7
+irvin.zVad_to_C8() #7
 
 # From lopez_modules
 lopez.declare_initial_conditions()

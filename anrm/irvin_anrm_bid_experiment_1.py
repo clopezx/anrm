@@ -45,7 +45,6 @@ model.monomers = merged_monomers
         5a) RIP1 de-ubiquitination in the 2o complex
         5a) TRADD can bind RIP1-unmod as well as RIP1-deub
     6) Bid-po4 sequesters RIP1
-    7) C3 inhibits MLKL
     
     """
 # From irvin_modules
@@ -69,7 +68,6 @@ irvin.RIP1_truncation()
 irvin.Bid_Hypothesis() #6
 irvin.C8_catalyzed_truncations()
 irvin.rip1_to_MLKL()
-irvin.C3_inhibits_MLKL()#7
 
 # From lopez_modules
 lopez.declare_initial_conditions()

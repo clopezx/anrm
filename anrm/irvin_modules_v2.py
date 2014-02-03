@@ -65,7 +65,7 @@ def Momomers_FasL_to_DISC():
     Monomer('flip_L', ['bDED'])   #c-Flip[L] binds FADD at DED2
     Monomer('flip_S', ['bDED'])   #c-Flip[S] binds FADD at DED2
     Monomer('proC8', ['bDED'])    #procaspase 8 binds FADD at DED1 or DED2
-    Monomer('C8', ['bf', 'state'], {'state':['A']})        #active caspase 8
+    Monomer('C8', ['bf', 'state'], {'state':['A', 'I']})        #active caspase 8
     Monomer('Bar', ['bC8'])       #bifunctional apoptosis regulator
     alias_model_components()
 
@@ -428,6 +428,19 @@ def Bid_Hypothesis():
     bind(RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bRHIM', Bid(bf = None, state = 'po4'), 'bf', [1e-6, 1e-3])
     bind(RIP1(bDD = None, bRHIM = None, state = 'deub'), 'bRHIM', Bid(bf = None, state = 'po4'), 'bf', [1e-6, 1e-3])
 
+def Bid_RIP_recruits_proC8():
+    Rule('Bid_recruits_1', RIP1(bDD = None, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') + proC8(bDED = None) <> RIP1(bDD = 1, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = 1), Parameter('kbid1', 1e-6), Parameter('kbid2', 1e-3))
+
+    Rule('Bid_recruits_2', RIP1(bDD = None, bRHIM =  ANY, state = 'deub') % Bid(bf = ANY, state = 'po4') + proC8(bDED = None) <> RIP1(bDD = 1, bRHIM =  ANY, state = 'deub') % Bid(bf = ANY, state = 'po4') % proC8(bDED = 1), Parameter('kbid3', 1e-6), Parameter('kbid4', 1e-3))
+
+def Bid_RIP_proC8_truncation():
+    Rule('Bid_trunc_RIP_1', RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) >> Bid(bf = None, state = 'po4') + RIP1(bDD = None, bRHIM = None, state = 'trunc') + proC8(bDED = None), Parameter('kbid5', 1e-1))
+    
+    Rule('Bid_trunc_RIP_2', RIP1(bDD = ANY, bRHIM =  ANY, state = 'deub') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) >> Bid(bf = None, state = 'po4') + RIP1(bDD = None, bRHIM = None, state = 'trunc')+ proC8(bDED = None), Parameter('kbid6', 1e-1))
+
+def Bid_RIP_proC8_to_NFkB():
+    Rule('Bid_RIP_NFkB', RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) >>RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) + NFkB(bf=None), Parameter('kbid7', 1e-1))
+
 def Bidpo4_to_tBid_Hypothesis():
     """Here we allow truncation of Bid_po4"""
     catalyze_state(C8(bf = None, state = 'A'), 'bf', Bid(), 'bf', 'state', 'po4', 'T', [1.04e-5, 0.005, 0.1])
@@ -468,8 +481,25 @@ def rip1_to_MLKL():
 
 def C3_inhibits_MLKL():
     """it has not been established whether MLKL is de-activated in apoptosis. But inorder to make a cellular decision you have to have one choice, once selected, inhibit all of the alternative pathways. This is a hypothetical apoptosis mediated inhibition of necrosis effector, MLKL."""
-    catalyze_state(C3(state='A'), 'bf', MLKL(), 'bRHIM', 'state','unmod','inactive', [1e-6, 1e-2, 1e-1])
+    catalyze_state(C3(state='A'), 'bf', MLKL(), 'bRHIM', 'state','unmod','inactive', [1e-6, 1e-2, 1e1])
 
+def Momomers_zVad_to_C8():
+    Monomer('zVad', ['bC8'])       # apoptosis inhibitor
+    alias_model_components()
+
+def Initials_zVad_to_C8():
+    Parameter('zVad_0'   ,  0) # 20uM zVad converts to 9.6e6  molecules per cell if the cell volume = 8e-13L.
+    alias_model_components()
+    
+    Initial(zVad(bC8=None), zVad_0)
+
+def zVad_to_C8():
+    bind(zVad(bC8 = None), 'bC8', C8(bf = None, state = 'A'), 'bf', [1e-6, 1e-3])
+    bind(zVad(bC8 = None), 'bC8', C3(bf = None, state = 'A'), 'bf', [1e-6, 1e-3])
+    
+    Rule('zVad_C8', zVad(bC8 = ANY)%C8(bf = ANY, state = 'A') >> zVad(bC8 = ANY)%C8(bf = ANY, state = 'I'), Parameter('kzVad1', 1e-1))
+    Rule('zVad_C3', zVad(bC8 = ANY)%C3(bf = ANY, state = 'A') >> zVad(bC8 = ANY)%C3(bf = ANY, state = 'I'),Parameter('kzVad2', 1e-1))
+         
 def observables():
     Observable('Obs_TNFa', TNFa(blig =  None))
     Observable('Obs_Fas', Fas(blig = None))
@@ -501,3 +531,4 @@ def observables():
     Observable('Obs_cPARP', PARP(state='C'))
     Observable('Obs_PARP', PARP(state='U'))
     Observable('Obs_MLKL', MLKL(state = 'active'))
+    Observable('Obs_CytoC', CytoC(state='A'))
