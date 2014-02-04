@@ -32,19 +32,20 @@ def ydata_fn():
     """return and array of synthesized experimental data. The array is loosely based on published experiments"""
     Apop1_td = 6.0 #six hours 
     Apop2_td = 4.0 #four hours 
-    Necr1_td = 4.0 #four hours 
+    Necr1_td = 2.0 #four hours
 
-    switchtime = 1.0 #one hour
-    switchtime2 = 2.0 # [hrs]
+    switchtime_cPARP = 1.0 #one hour
+    switchtime_CytoC = 3.0 # [hrs]
+    switchtime_MLKL = 1.0 # [hrs]
 
-    Apop1_obs = ['Obs_CytoC']
+    Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior. 
     Apop2_obs = ['Obs_cPARP']
     Necr1_obs = ['Obs_MLKL']
     
     ydata = {}
-    ydata['Apop1'] = [np.array([[(Apop1_td-switchtime/2), Apop1_td, (Apop1_td+switchtime/2), Apop1_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.25]]).T, Apop1_obs]
-    ydata['Apop2'] = [np.array([[(Apop2_td-switchtime/2), Apop2_td, (Apop2_td+switchtime/2), Apop2_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Apop2_obs]
-    ydata['Necr1'] = [np.array([[(Necr1_td-switchtime2/2), Necr1_td, (Necr1_td+switchtime2/2), Necr1_td+6.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Necr1_obs]
+    ydata['Apop1'] = [np.array([[(Apop1_td-switchtime_CytoC/2), Apop1_td, (Apop1_td+switchtime_CytoC/2)], [0.05, 0.5, 0.95], [0.025, 0.1, 0.05]]).T, Apop1_obs]
+    ydata['Apop2'] = [np.array([[(Apop2_td-switchtime_cPARP/2), Apop2_td, (Apop2_td+switchtime_cPARP/2), Apop2_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Apop2_obs]
+    ydata['Necr1'] = [np.array([[(Necr1_td-switchtime_MLKL/2), Necr1_td, (Necr1_td+switchtime_MLKL/2), Necr1_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Necr1_obs]
     
     return ydata
 
@@ -105,8 +106,8 @@ sims = sim.Settings()
 sims.model = model
 sims.tspan = np.linspace(0,36000,1000) #10hrs converted to seconds (1000 timepoints)
 sims.estimate_params = model.parameters_rules()
-sims.rtol = 1e-3
-sims.atol = 1e-6
+sims.rtol = 1e-5
+sims.atol = 1e-5
 
 solve = sim.Solver(sims)
 solve.run()
@@ -115,11 +116,11 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 1000
+opts.nsteps = 6000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
-opts.seed = 1
+opts.seed = 23
 opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 
