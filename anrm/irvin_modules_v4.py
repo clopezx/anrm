@@ -379,4 +379,4 @@ def observables():
     Observable('Obs_cPARP', PARP(state='C'))
     Observable('Obs_PARP', PARP(state='U'))
     Observable('Obs_MLKL', MLKL(state = 'active'))
-    Observable('Obs_CytoC', CytoC(state='A'))
+    Observable('Obs_CytoC', CytoC(state='C')+CytoC(state='A'))
