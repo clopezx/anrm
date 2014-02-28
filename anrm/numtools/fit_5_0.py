@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('6000_comp_23_bid_123_fm_position_v2.pkl'))
+#initial_position = pickle.load(open('6000_comp_23_bid_123_fm_position_v2.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
