@@ -12,7 +12,7 @@ from irvin_mod_v4_tester import model
 from pysb.integrate  import odesolve
 
 #-----------Calibrated Parameters-----------------------
-position = pickle.load(open('6000_runs_comp_hyp1_bid_hyp123_position.pkl'))
+position = pickle.load(open('1000_comp_2_bid123.pkl'))
 
 #-----------Simulator Settings--------------------------
 sims = sim.Settings()
@@ -27,7 +27,7 @@ solve.run()
 
 #-----------Initial Conditions--------------------------
 ic_params  = model.parameters_initial_conditions()
-conditions = ct.initial_conditions(['Bak_0', 'Bax_0', 'Bid_0'], [0.2e5, 40165, 12044], ic_params)
+conditions = ct.initial_conditions(['Bak_0', 'Bax_0', 'Bid_0', 'zVad_0'], [0.2e5, 40165, 12044, 0], ic_params)
 ysim = solve.simulate(position, observables=True, initial_conc = conditions)
 
 yout = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL','Obs_TNFa','Obs_NFkB', 'ComplexI','ComplexI_ub', 'ComplexI_TRAF', 'TRADD_RIP1', 'TRADD_RIP1_2','Obs_FADD_Sole', 'ComplexII','Bid_Trunc', 'Bid_PO4','Obs_RIP1', 'RIP1_Trunc', 'RIP3_Trunc', 'Necrosome','Obs_proC8', 'Obs_C8', 'Obs_C3ub', 'Obs_C3', 'Obs_pC3', 'RIP1_FADD','Obs_cPARP', 'Obs_PARP', 'Obs_MLKL','Obs_CytoC'])
