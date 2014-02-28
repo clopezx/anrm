@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('Complex II Hypthesis 1 and 3')
+Exp_name = ('Complex II Hypthesis 2 and 3')
 #----Data and conditions----
 ydata = ydata_fn()
 #init_conc = {'Apop1':{'TNFa_0': 600}}
@@ -181,7 +181,7 @@ for k in conditions.keys():
     ii = ii+1
 
 plt.xlabel('time [hrs]')
-plt.title('CompII Hypotheses 1,3; Apoptotic and Necrotic Signals')
+plt.title('CompII Hypotheses 2,3; Apoptotic and Necrotic Signals')
 plt.legend(loc = 'lower left', bbox_to_anchor = (1.0, -0.02))
 
 
