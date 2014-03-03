@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('Complex II Hypthesis 1')
+Exp_name = ('Complex II Hypthesis 1-3')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -136,7 +136,7 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 3000
+opts.nsteps = 2000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
