@@ -41,8 +41,8 @@ irvin.CompI_TRADD_RIP1_Dissociation()
 """Hypothesis 1: FADD transiently localizes to TNFR1 to retrieve RIP1
     Hypothesis 2: FADD replaces TRADD in TRADD:RIP1
     Hypothesis 3: FADD binds TRADD in TRADD:RIP1"""
-irvin.CompII_Hypothesis_1()
-#irvin.CompII_Hypothesis_2()
+#irvin.CompII_Hypothesis_1()
+irvin.CompII_Hypothesis_2()
 irvin.CompII_Hypothesis_3()
 irvin.ComplexII_to_Bid_Initials()
 irvin.ComplexIIa_Assembly()
