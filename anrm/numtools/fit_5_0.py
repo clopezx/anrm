@@ -101,7 +101,8 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('Complex II Hypthesis 1')
+Exp_name = ('Complex II Hypthesis 1-3')
+
 #----Data and conditions----
 ydata = ydata_fn()
 #init_conc = {'Apop1':{'TNFa_0': 600}}
@@ -161,12 +162,25 @@ for param, new_value in zip(sims.estimate_params, fitted_values):
     values = (param.name, param.value, new_value, change)
     print '%-10s %-12.2g %-12.2g %-+6.2f' % values
 
-#plot data
+# save data
+for k in conditions.keys():
+    yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
+    
+    yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
+    ii = ii+1
+
+    pickle.dump(mcmc.position, open('%s_Position' % Exp_name, 'wb'))
+
+"""
+# plot data
 plt.ion()
 tspan = sims.tspan/3600
 initial_params = [p.value for p in sims.estimate_params]
 ii = 0
 colors = ['b', 'g', 'r', 'c']
+
 for k in conditions.keys():
     plt.errorbar(ynorm[k][0][:,0], ynorm[k][0][:,1], yerr = ynorm[k][0][:,2], fmt = '%s.' % colors[ii], label = '%s data' % k)
 
@@ -181,9 +195,9 @@ for k in conditions.keys():
     ii = ii+1
 
 plt.xlabel('time [hrs]')
-plt.title('CompII Hypotheses 2,3; Apoptotic and Necrotic Signals')
+plt.title('CompII Hypotheses 2; Apoptotic and Necrotic Signals')
 plt.legend(loc = 'lower left', bbox_to_anchor = (1.0, -0.02))
-
+"""
 
 """
 TODO

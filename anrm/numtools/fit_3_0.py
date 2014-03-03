@@ -3,6 +3,7 @@
 
 import pickle
 import bayessb
+import random as ra 
 import numpy as np
 import calibratortools as ct
 import simulator_1_0 as sim
@@ -26,19 +27,21 @@ from anrm.irvin_mod_v4_tester import model
     prior:
     step:
 """
+#-----------Previously Calibrated Parameters------------
+initial_position = pickle.load(open('3000_runs_Apop1only.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
     """return and array of synthesized experimental data. The array is loosely based on published experiments"""
-    Apop1_td = 6.0 #six hours 
-    Apop2_td = 4.0 #four hours 
+    Apop1_td = 6.0 #six hours
+    Apop2_td = 4.0 #four hours
     Necr1_td = 2.0 #four hours
 
-    switchtime_cPARP = 1.0 #one hour
     switchtime_CytoC = 3.0 # [hrs]
+    switchtime_cPARP = 1.0 #one hour
     switchtime_MLKL = 1.0 # [hrs]
 
-    Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior. 
+    Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior.
     Apop2_obs = ['Obs_cPARP']
     Necr1_obs = ['Obs_MLKL']
     
@@ -87,6 +90,7 @@ def step(mcmc):
 
 #----Data and conditions----
 ydata = ydata_fn()
+#init_conc = {'Apop1':{'TNFa_0': 600}}
 init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
 
 #----Normalize--------------
@@ -116,12 +120,13 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 6000
+opts.nsteps = 3000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
-opts.seed = 23
-opts.initial_values = solve.initial_values
+opts.seed = ra.randint(0,1000)
+opts.initial_values = np.power(10, initial_position)
+#opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 
 # values for prior calculation
