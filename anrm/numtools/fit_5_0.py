@@ -163,6 +163,8 @@ for param, new_value in zip(sims.estimate_params, fitted_values):
     print '%-10s %-12.2g %-12.2g %-+6.2f' % values
 
 # save data
+initial_params = [p.value for p in sims.estimate_params]
+
 for k in conditions.keys():
     yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
     pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
