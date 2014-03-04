@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_3')
+Exp_name = ('CompII_Hypthesis_123')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -172,7 +172,7 @@ for k in conditions.keys():
     yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
     pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
 
-pickle.dump(mcmc.position, open('%s_Position' % Exp_name, 'wb'))
+pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
 
 """
 # plot data
