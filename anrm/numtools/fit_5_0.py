@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_2')
+Exp_name = ('CompII_Hypthesis_3')
 
 #----Data and conditions----
 ydata = ydata_fn()
