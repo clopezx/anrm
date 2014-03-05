@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('3000_runs_Apop1only.pkl'))
+#initial_position = pickle.load(open('6000_comp_23_bid_123_fm_position_v2.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -38,8 +38,8 @@ def ydata_fn():
     Necr1_td = 2.0 #four hours
 
     switchtime_CytoC = 3.0 # [hrs]
-    switchtime_cPARP = 1.0 #one hour
-    switchtime_MLKL = 1.0 # [hrs]
+    switchtime_cPARP = 2.0 #one hour
+    switchtime_MLKL = 2.0 # [hrs]
 
     Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior.
     Apop2_obs = ['Obs_cPARP']
@@ -61,7 +61,19 @@ def objective_fn(position):
         ysim_norm  = ct.normalize(ysim_array, option = 1)
         ysim_tp    = ct.cubic_spline(solve.options.tspan, ysim_norm, ynorm[k][0][:,0]*3600)
         
-        objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
+        if (k == 'Necr1'):
+            objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
+        
+        else:
+            PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
+        
+            td_PARP = calculate_time_delay(PARP_MLKL_signals[:,0])
+            td_MLKL = calculate_time_delay(PARP_MLKL_signals[:,1])
+            
+            if td_MLKL < td_PARP:
+                objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2]))+abs(td_PARP - td_MLKL))
+            else:
+                objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
 
     return np.sum(objective)
     
@@ -88,10 +100,14 @@ def step(mcmc):
             (mcmc.iter, mcmc.sig_value, mcmc.T, float(mcmc.acceptance)/(mcmc.iter+1),
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
+#----Experiment Name--------
+Exp_name = ('CompII_Hypthesis_123')
+
 #----Data and conditions----
 ydata = ydata_fn()
 #init_conc = {'Apop1':{'TNFa_0': 600}}
 init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
+#init_conc = {'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}}
 
 #----Normalize--------------
 ynorm = ydata.copy()
@@ -120,19 +136,19 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 3000
+opts.nsteps = 2000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
 opts.seed = ra.randint(0,1000)
-opts.initial_values = np.power(10, initial_position)
-#opts.initial_values = solve.initial_values
+#opts.initial_values = np.power(10, initial_position)
+opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 
 # values for prior calculation
 prior_mean = [p.value for p in solve.options.estimate_params]
 prior_ln_mean = np.log10(prior_mean)
-prior_var = 7.0
+prior_var = 6.0
 
 mcmc = bmc.MCMC(opts)
 mcmc.run()
@@ -146,27 +162,43 @@ for param, new_value in zip(sims.estimate_params, fitted_values):
     values = (param.name, param.value, new_value, change)
     print '%-10s %-12.2g %-12.2g %-+6.2f' % values
 
-#plot data
+# save data
+initial_params = [p.value for p in sims.estimate_params]
+
+for k in conditions.keys():
+    yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
+    
+    yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
+
+pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
+
+"""
+# plot data
 plt.ion()
 tspan = sims.tspan/3600
 initial_params = [p.value for p in sims.estimate_params]
 ii = 0
 colors = ['b', 'g', 'r', 'c']
+
 for k in conditions.keys():
     plt.errorbar(ynorm[k][0][:,0], ynorm[k][0][:,1], yerr = ynorm[k][0][:,2], fmt = '%s.' % colors[ii], label = '%s data' % k)
 
     yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
     plt.plot(tspan, yinitial, '%s--' % colors[ii], label = 'initial %s' % k)
 
     yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
+    pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
     plt.plot(tspan, yfinal, '%s-' % colors[ii], label = 'final %s' % k)
 
     ii = ii+1
 
 plt.xlabel('time [hrs]')
-plt.title('Apoptotic and Necrotic Signals')
+plt.title('CompII Hypotheses 2; Apoptotic and Necrotic Signals')
 plt.legend(loc = 'lower left', bbox_to_anchor = (1.0, -0.02))
-
+"""
 
 """
 TODO
