@@ -136,7 +136,7 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 2000
+opts.nsteps = 1000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
