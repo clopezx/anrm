@@ -170,7 +170,7 @@ for k in conditions.keys():
     pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
     
     yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
-    pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
+    pickle.dump(yfinal, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
 
 pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
 
