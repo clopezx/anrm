@@ -35,20 +35,20 @@ def ydata_fn():
     """return and array of synthesized experimental data. The array is loosely based on published experiments"""
     Apop1_td = 6.0 #six hours
     Apop2_td = 4.0 #four hours
-    Necr1_td = 2.0 #four hours
+    Necr1_td = 4.0 #four hours
 
-    switchtime_CytoC = 3.0 # [hrs]
-    switchtime_cPARP = 2.0 #one hour
-    switchtime_MLKL = 2.0 # [hrs]
+    switchtime_CytoC = 1.0 # [hrs]
+    switchtime_cPARP = 1.0 #one hour
+    switchtime_MLKL = 1.0 # [hrs]
 
     Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior.
     Apop2_obs = ['Obs_cPARP']
     Necr1_obs = ['Obs_MLKL']
     
     ydata = {}
-    ydata['Apop1'] = [np.array([[(Apop1_td-switchtime_CytoC/2), Apop1_td, (Apop1_td+switchtime_CytoC/2)], [0.05, 0.5, 0.95], [0.025, 0.1, 0.05]]).T, Apop1_obs]
-    ydata['Apop2'] = [np.array([[(Apop2_td-switchtime_cPARP/2), Apop2_td, (Apop2_td+switchtime_cPARP/2), Apop2_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Apop2_obs]
-    ydata['Necr1'] = [np.array([[(Necr1_td-switchtime_MLKL/2), Necr1_td, (Necr1_td+switchtime_MLKL/2), Necr1_td+4.0], [0.05, 0.5, 0.95, 1], [0.025, 0.1, 0.05, 0.025]]).T, Necr1_obs]
+    ydata['Apop1'] = [np.array([[(Apop1_td-switchtime_CytoC/2), (Apop1_td-switchtime_CytoC/4), (Apop1_td-switchtime_CytoC/8), Apop1_td, (Apop1_td+switchtime_CytoC/8), (Apop1_td+switchtime_CytoC/4), (Apop1_td+switchtime_CytoC/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95],[0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Apop1_obs]
+    ydata['Apop2'] = [np.array([[(Apop2_td-switchtime_cPARP/2), (Apop2_td-switchtime_cPARP/4), (Apop2_td-switchtime_cPARP/8), Apop2_td, (Apop2_td+switchtime_cPARP/8), (Apop2_td+switchtime_cPARP/4), (Apop2_td+switchtime_cPARP/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95], [0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Apop2_obs]
+    ydata['Necr1'] = [np.array([[(Necr1_td-switchtime_MLKL/2), (Necr1_td-switchtime_MLKL/4), (Necr1_td-switchtime_MLKL/8), Necr1_td, (Necr1_td+switchtime_MLKL/8), (Necr1_td+switchtime_MLKL/4), (Necr1_td+switchtime_MLKL/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95], [0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Necr1_obs]
     
     return ydata
 
@@ -174,7 +174,7 @@ for k in conditions.keys():
 
 pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
 
-"""
+
 # plot data
 plt.ion()
 tspan = sims.tspan/3600
@@ -198,7 +198,7 @@ for k in conditions.keys():
 plt.xlabel('time [hrs]')
 plt.title('CompII Hypotheses 2; Apoptotic and Necrotic Signals')
 plt.legend(loc = 'lower left', bbox_to_anchor = (1.0, -0.02))
-"""
+
 
 """
 TODO
