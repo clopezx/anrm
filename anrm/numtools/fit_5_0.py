@@ -140,9 +140,9 @@ opts.nsteps = 2000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
-#opts.seed = ra.randint(0,1000)
+opts.seed = ra.randint(0,1000)
 opts.initial_values = np.power(10, initial_position)
-opts.initial_values = solve.initial_values
+#opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 
 # values for prior calculation
