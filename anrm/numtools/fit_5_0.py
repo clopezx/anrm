@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('CompII_Hypthesis_123_Position_ts30.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123')
+Exp_name = ('CompII_Hypthesis_123_ts30')
 
 #----Data and conditions----
 ydata = ydata_fn()
