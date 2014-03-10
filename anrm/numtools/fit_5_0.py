@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-#initial_position = pickle.load(open('6000_comp_23_bid_123_fm_position_v2.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -187,11 +187,9 @@ for k in conditions.keys():
     plt.errorbar(ynorm[k][0][:,0], ynorm[k][0][:,1], yerr = ynorm[k][0][:,2], fmt = '%s.' % colors[ii], label = '%s data' % k)
 
     yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
-    pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
     plt.plot(tspan, yinitial, '%s--' % colors[ii], label = 'initial %s' % k)
 
     yfinal = ct.normalize(ct.extract_records(solve.simulate(mcmc.position, observables=True, initial_conc=conditions[k]),ynorm[k][1]), option = 1)
-    pickle.dump(yinitial, open('%s_Final_Values_%s.pkl' % (Exp_name, k), 'wb'))
     plt.plot(tspan, yfinal, '%s-' % colors[ii], label = 'final %s' % k)
 
     ii = ii+1
