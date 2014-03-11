@@ -48,7 +48,7 @@ def ydata_fn():
     ydata = {}
     ydata['Apop1'] = [np.array([[(Apop1_td-switchtime_CytoC/2), (Apop1_td-switchtime_CytoC/4), (Apop1_td-switchtime_CytoC/8), Apop1_td, (Apop1_td+switchtime_CytoC/8), (Apop1_td+switchtime_CytoC/4), (Apop1_td+switchtime_CytoC/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95],[0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Apop1_obs]
     ydata['Apop2'] = [np.array([[(Apop2_td-switchtime_cPARP/2), (Apop2_td-switchtime_cPARP/4), (Apop2_td-switchtime_cPARP/8), Apop2_td, (Apop2_td+switchtime_cPARP/8), (Apop2_td+switchtime_cPARP/4), (Apop2_td+switchtime_cPARP/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95], [0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Apop2_obs]
-    #ydata['Necr1'] = [np.array([[(Necr1_td-switchtime_MLKL/2), (Necr1_td-switchtime_MLKL/4), (Necr1_td-switchtime_MLKL/8), Necr1_td, (Necr1_td+switchtime_MLKL/8), (Necr1_td+switchtime_MLKL/4), (Necr1_td+switchtime_MLKL/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95], [0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Necr1_obs]
+    ydata['Necr1'] = [np.array([[(Necr1_td-switchtime_MLKL/2), (Necr1_td-switchtime_MLKL/4), (Necr1_td-switchtime_MLKL/8), Necr1_td, (Necr1_td+switchtime_MLKL/8), (Necr1_td+switchtime_MLKL/4), (Necr1_td+switchtime_MLKL/2)], [0.05, 0.205, 0.340, 0.5, 0.659, 0.794, 0.95], [0.025, 0.05, 0.075, 0.1, 0.085, 0.065, 0.05]]).T, Necr1_obs]
     
     return ydata
 
@@ -108,6 +108,7 @@ ydata = ydata_fn()
 #init_conc = {'Apop1':{'TNFa_0': 600}}
 init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
 #init_conc = {'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}}
+init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}}
 
 #----Normalize--------------
 ynorm = ydata.copy()
