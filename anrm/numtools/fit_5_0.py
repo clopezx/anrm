@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('CompII_Hypthesis_123_Position.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_ts30_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -38,8 +38,8 @@ def ydata_fn():
     Necr1_td = 4.0 #four hours
 
     switchtime_CytoC = 0.5 # [hrs]
-    switchtime_cPARP = 1.0 #one hour
-    switchtime_MLKL = 0.5 # [hrs]
+    switchtime_cPARP = 0.5 #one hour
+    switchtime_MLKL = 1.0 # [hrs]
 
     Apop1_obs = ['Obs_CytoC'] #Zhang et al. Monitored CytoC (Obs_CytoC) but CytoC does not have switch behavior.
     Apop2_obs = ['Obs_cPARP']
