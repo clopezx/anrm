@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('CompII_Hypthesis_123_addeddata_2run_Position.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_addeddata_3run_v2_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -101,7 +101,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123_addeddata_3run_v4')
+Exp_name = ('CompII_Hypthesis_123_addeddata_4run_v21')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -146,6 +146,7 @@ opts.seed = ra.randint(0,1000)
 opts.initial_values = np.power(10, initial_position)
 #opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
+opts.T_init = 5
 
 # values for prior calculation
 prior_mean = [p.value for p in solve.options.estimate_params]
