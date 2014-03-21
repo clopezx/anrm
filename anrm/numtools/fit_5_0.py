@@ -146,7 +146,7 @@ opts.seed = ra.randint(0,1000)
 #opts.initial_values = np.power(10, initial_position)
 opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
-opts.T_init = 5
+opts.T_init = 10
 
 # values for prior calculation
 prior_mean = [p.value for p in solve.options.estimate_params]
