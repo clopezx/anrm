@@ -320,12 +320,12 @@ def Bid_Hypothesis():
     # Bid-PO4 sequestering RIP1
     bind(RIP1(bDD = None, bRHIM = None, state = 'unmod'), 'bRHIM', Bid(bf = None, state = 'po4'), 'bf', [1e-6, 1e-3])
 
-def Bid_RIP_recruits_proC8():
+def Bid_RIP_recruits_C8():
     #Bid mediated inhibition of necrosis (hypothesis 1)
-    Rule('Bid_recruits_1', RIP1(bDD = None, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') + proC8(bDED = None) <> RIP1(bDD = 1, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = 1), Parameter('kbid1', 1e-6), Parameter('kbid2', 1e-3))
+    Rule('Bid_recruits_1', RIP1(bDD = None, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') + C8(bf = None, state = 'A') <> RIP1(bDD = 1, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % C8(bf = 1, state = 'A'), Parameter('kbid1', 1e-6), Parameter('kbid2', 1e-3))
 
-def Bid_RIP_proC8_truncation():
-    Rule('Bid_trunc_RIP_1', RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) >> Bid(bf = None, state = 'po4') + RIP1(bDD = None, bRHIM = None, state = 'trunc') + proC8(bDED = None), Parameter('kbid5', 1e-1))
+def Bid_RIP_C8_truncation():
+    Rule('Bid_trunc_RIP_1', RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4')%C8(bf = ANY, state = 'A') >> Bid(bf = None, state = 'po4') + RIP1(bDD = None, bRHIM = None, state = 'trunc') + C8(bf = None, state = 'A'), Parameter('kbid5', 1e-1))
 
 def Bid_RIP_proC8_to_NFkB():
     #Bid mediated inhibition of necrosis (hypothesis 1)

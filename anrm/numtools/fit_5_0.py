@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-initial_position = pickle.load(open('CompII_Hypthesis_123_addeddata_3run_v4_Position.pkl'))
+#initial_position = pickle.load(open('CompII_Hypthesis_123_addeddata_4run_v23_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -138,13 +138,13 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 2000
+opts.nsteps = 3000
 opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
 opts.seed = ra.randint(0,1000)
-opts.initial_values = np.power(10, initial_position)
-#opts.initial_values = solve.initial_values
+#opts.initial_values = np.power(10, initial_position)
+opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 opts.T_init = 5
 
