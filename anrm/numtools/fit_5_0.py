@@ -57,23 +57,30 @@ def objective_fn(position):
     objective = []
     for k in conditions.keys():
         ysim = solve.simulate(position, observables=True, initial_conc=conditions[k])
-        ysim_array = ct.extract_records(ysim, ynorm[k][1])
-        ysim_norm  = ct.normalize(ysim_array, option = 1)
-        ysim_tp    = ct.cubic_spline(solve.options.tspan, ysim_norm, ynorm[k][0][:,0]*3600)
+        PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
         
-        if (k == 'Necr1'):
-            objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
-        
+        if (k == 'BidKO'):
+            if max(PARP_MLKL_signals[0]>0):
+                td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
+                td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
+                if td_PARP < td_MLKL:
+                    objective.append(abs(td_PARP - td_MLKL))
+    
         else:
-            PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
+            ysim_array = ct.extract_records(ysim, ynorm[k][1])
+            ysim_norm  = ct.normalize(ysim_array, option = 1)
+            ysim_tp    = ct.cubic_spline(solve.options.tspan, ysim_norm, ynorm[k][0][:,0]*3600)
         
-            td_PARP = calculate_time_delay(PARP_MLKL_signals[:,0])
-            td_MLKL = calculate_time_delay(PARP_MLKL_signals[:,1])
-            
-            if td_MLKL < td_PARP:
-                objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2]))+abs(td_PARP - td_MLKL))
-            else:
+            if (k == 'Necr1'):
                 objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
+        
+            else:
+                td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
+                td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
+                if td_MLKL < td_PARP:
+                    objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2]))+abs(td_PARP - td_MLKL))
+                else:
+                    objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
 
     return np.sum(objective)
     
@@ -101,14 +108,14 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v0')
+Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v1')
 
 #----Data and conditions----
 ydata = ydata_fn()
 #init_conc = {'Apop1':{'TNFa_0': 600}}
 #init_conc = {'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}}
 #init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}}
-init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
+init_conc = {'Apop1':{'TNFa_0': 600}, 'Apop2':{'TNFa_0': 1200}, 'Necr1':{'TNFa_0':1800, 'zVad_0':9.6e6, 'FADD_0':0}, 'BidKO':{'Bid_0': 0}} #600 = 10ng/ml TNFa, 9.6e6 = 20uM
 
 
 #----Normalize--------------
@@ -146,7 +153,7 @@ opts.seed = ra.randint(0,1000)
 #opts.initial_values = np.power(10, initial_position)
 opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
-opts.T_init = 5
+opts.T_init = 10
 
 # values for prior calculation
 prior_mean = [p.value for p in solve.options.estimate_params]
