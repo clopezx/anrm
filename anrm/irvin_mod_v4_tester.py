@@ -57,8 +57,8 @@ irvin.Bid_Hypothesis_initials()
     Hypothesis 2: Bid:proC8 truncates RIP1
     Hypothesis 3: Bid:proC8 activates NFkB"""
 irvin.Bid_Hypothesis() #Bid mediated inhibition of necrosis (hypothesis 1)
-irvin.Bid_RIP_recruits_proC8() #Bid mediated inhibition of necrosis (hypothesis 2)
-irvin.Bid_RIP_proC8_truncation() #Bid mediated inhibition of necrosis (hypothesis 2)
+irvin.Bid_RIP_recruits_C8() #Bid mediated inhibition of necrosis (hypothesis 2)
+irvin.Bid_RIP_C8_truncation() #Bid mediated inhibition of necrosis (hypothesis 2)
 irvin.Bid_RIP_proC8_to_NFkB() #Bid mediated inhibition of necrosis (hypothesis 3)
 irvin.C3_inhibits_MLKL()
 irvin.Initials_zVad_to_C8()
