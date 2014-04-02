@@ -159,8 +159,8 @@ def ComplexII_to_Bid_Monomers():
     Monomer('MLKL', ['bRHIM', 'state'], {'state':['unmod', 'active', 'inactive']})
 
 def ComplexII_to_Bid_Initials():
-    Parameter('flip_L_0',  39022) # 39022 molecules per cell (J Immunol 2005)
-    Parameter('flip_S_0',  39022) # molecules per cell assummed both isoforms w/conc.
+    Parameter('flip_L_0',  39023) # 39022 molecules per cell (J Immunol 2005)
+    Parameter('flip_S_0',  39023) # molecules per cell assummed both isoforms w/conc.
     Parameter('proC8_0' ,  16057) # procaspase 8 molecules per cell 16057 (J Immunol 2005)
     Parameter('C8_0'    ,      0) # active caspase 8 dimers per cell.
     Parameter('RIP3_0'  ,  2.0e4) # molecules per cell

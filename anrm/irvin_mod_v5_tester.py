@@ -51,6 +51,7 @@ irvin.RIP1_truncation_ComplexII()
 irvin.C8_catalyzed_truncations()
 irvin.NFkB_Activation_and_Signaling_Initials()
 irvin.NFkB_Activation_and_Signaling()
+
 irvin.Bid_Hypothesis_initials()
 """Hypothesis 0: Bid-po4 does not occur
     Hypothesis 1: Bid-po4 recruits proC8 and cFlip_L and mediates RIP1 and CYLD truncation."""
