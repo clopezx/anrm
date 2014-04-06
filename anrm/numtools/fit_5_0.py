@@ -28,7 +28,7 @@ from anrm.irvin_mod_v5_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-#initial_position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v0_Position.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v1_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -108,7 +108,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v3')
+Exp_name = ('CompII_Hypthesis_123_newtopology_2run_v10')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -150,8 +150,8 @@ opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
 opts.seed = ra.randint(0,1000)
-#opts.initial_values = np.power(10, initial_position)
-opts.initial_values = solve.initial_values
+opts.initial_values = np.power(10, initial_position)
+#opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 opts.T_init = 10
 
