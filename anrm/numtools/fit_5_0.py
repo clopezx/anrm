@@ -28,7 +28,7 @@ from anrm.irvin_mod_v5_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-#initial_position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v1_Position.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v3_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -150,8 +150,8 @@ opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
 opts.seed = ra.randint(0,1000)
-#opts.initial_values = np.power(10, initial_position)
-opts.initial_values = solve.initial_values
+opts.initial_values = np.power(10, initial_position)
+#opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 opts.T_init = 10
 
@@ -185,7 +185,7 @@ for k in ydata.keys():
 pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
 
 
-# plot data
+"""# plot data
 plt.ion()
 tspan = sims.tspan/3600
 initial_params = [p.value for p in sims.estimate_params]
@@ -206,7 +206,7 @@ for k in conditions.keys():
 plt.xlabel('time [hrs]')
 plt.title('CompII Hypotheses 2; Apoptotic and Necrotic Signals')
 plt.legend(loc = 'lower left', bbox_to_anchor = (1.0, -0.02))
-
+"""
 
 """
 TODO
