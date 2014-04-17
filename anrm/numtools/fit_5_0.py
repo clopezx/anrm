@@ -10,7 +10,7 @@ import simulator_1_0 as sim
 import bayes_mcmc as bmc
 import matplotlib.pyplot as plt
 
-from anrm.irvin_mod_v5_tester import model
+from anrm.irvin_mod_v5_wo_po4bid import model
 
 #----Experimental Data----
 """
@@ -60,6 +60,7 @@ def objective_fn(position):
         PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
         
         if (k == 'BidKO'):
+            print "Bid necrotic k = ", k
             if max(PARP_MLKL_signals[0]>0):
                 td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
                 td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
@@ -72,14 +73,17 @@ def objective_fn(position):
             ysim_tp    = ct.cubic_spline(solve.options.tspan, ysim_norm, ynorm[k][0][:,0]*3600)
         
             if (k == 'Necr1'):
+                print "necrotic k = ", k
                 objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
         
             else:
                 td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
                 td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
                 if td_MLKL < td_PARP:
+                    print "apoptotic corrected, k = %s, td_PARP = %s, td_MLKL = %s" % (k, td_PARP, td_MLKL)
                     objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2]))+abs(td_PARP - td_MLKL))
                 else:
+                    print "apoptotic, k = %s, td_PARP = %s, td_MLKL = %s" % (k, td_PARP, td_MLKL)
                     objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
 
     return np.sum(objective)
@@ -108,7 +112,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123_newtopology_2run_v43')
+Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v0')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -150,8 +154,8 @@ opts.likelihood_fn = objective_fn
 opts.prior_fn = prior
 opts.step_fn = step
 opts.seed = ra.randint(0,1000)
-opts.initial_values = np.power(10, initial_position)
-#opts.initial_values = solve.initial_values
+#opts.initial_values = np.power(10, initial_position)
+opts.initial_values = solve.initial_values
 opts.initial_conc = conditions
 opts.T_init = 10
 

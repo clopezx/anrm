@@ -62,7 +62,7 @@ def TNFa_to_ComplexI_Monomers():
     alias_model_components()
 
 def TNFa_to_ComplexI_Initials():
-    Parameter('TNFa_0'  ,  6000) # 6000 corresponds to 100ng/ml TNFa
+    Parameter('TNFa_0'  ,  600) # 6000 corresponds to 100ng/ml TNFa
     Parameter('TNFR1_0' ,  4800) # 4800 receptors per cell
     Parameter('TRADD_0' ,  9000) # molecules per cell (arbitrarily assigned) 9000
     Parameter('RIP1_0'  , 12044) # molecules per cell (arbitrarily assigned) 12044
