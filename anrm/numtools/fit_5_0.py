@@ -60,7 +60,6 @@ def objective_fn(position):
         PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
         
         if (k == 'BidKO'):
-            print "Bid necrotic k = ", k
             if max(PARP_MLKL_signals[0]>0):
                 td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
                 td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
@@ -73,17 +72,14 @@ def objective_fn(position):
             ysim_tp    = ct.cubic_spline(solve.options.tspan, ysim_norm, ynorm[k][0][:,0]*3600)
         
             if (k == 'Necr1'):
-                print "necrotic k = ", k
                 objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
         
             else:
                 td_PARP = ct.calculate_time_delay(PARP_MLKL_signals[:,0], sims.tspan)
                 td_MLKL = ct.calculate_time_delay(PARP_MLKL_signals[:,1], sims.tspan)
                 if td_MLKL < td_PARP:
-                    print "apoptotic corrected, k = %s, td_PARP = %s, td_MLKL = %s" % (k, td_PARP, td_MLKL)
                     objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2]))+abs(td_PARP - td_MLKL))
                 else:
-                    print "apoptotic, k = %s, td_PARP = %s, td_MLKL = %s" % (k, td_PARP, td_MLKL)
                     objective.append(np.sum((ynorm[k][0][:,1] - ysim_tp) ** 2 / (2 * ynorm[k][0][:,2])))
 
     return np.sum(objective)
