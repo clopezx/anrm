@@ -112,7 +112,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hyp_123_Bid_Hyp0_newtopology_1run_v1')
+Exp_name = ('CompII_Hyp_123_Bid_Hyp0_newtopology_1run_v2')
 
 #----Data and conditions----
 ydata = ydata_fn()
