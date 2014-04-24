@@ -154,7 +154,7 @@ yout = ['Obs_cPARP']
 # show prediction for C trajectory, which was not fit to
 bp.surf(mcmc, dim0, dim1, mask=True, walk=True, rejects=True, step=1,
      square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
-     zmax=None, position_base=None, parallelize=False, gridsize=20)
+     zmax=None, position_base=None, parallelize=True, gridsize=20)
 
 """
 Display the posterior of an MCMC walk on a 3-D surface.
