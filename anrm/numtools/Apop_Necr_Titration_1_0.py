@@ -8,7 +8,7 @@ import calibratortools as ct
 import simulator_1_0 as sim
 
 # ----------Model and Initial Conditions----------------
-from anrm.irvin_mod_v4_tester  import model
+from anrm.irvin_mod_v5_tester  import model
 
 range_proC8 = np.linspace(10,50000,101) #starting at zero causes NaNs when you normalize the data.
 range_cFlip = np.linspace(0,200000,201)
@@ -17,12 +17,12 @@ range_RIP1  = np.linspace(10,35000, 101)
 range_BidK  = np.linspace(0, 10000, 51)
 
 #-----------Calibrated Parameters-----------------------
-position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v0_Position.pkl'))
+position = pickle.load(open('CompII_Hypthesis_123_newtopology_2run_v40_Position.pkl'))
 
 #-----------Simulator Settings--------------------------
 sims = sim.Settings()
 sims.model = model
-sims.tspan = np.linspace(0,72000,4000) #24hrs converted to seconds (1000 timepoints)
+sims.tspan = np.linspace(0,72000,4000) #24hrs converted to seconds (4000 timepoints)
 sims.estimate_params = model.parameters_rules()
 sims.rtol = 1e-5
 sims.atol = 1e-5
@@ -34,9 +34,9 @@ delta_td = []
 apopt_td = []
 necro_td = []
 
-condition_variable = 'Bid_0'
-graph_name = 'Bid'
-rangecv = range_Bid
+condition_variable = 'RIP1_0'
+graph_name = 'RIP1'
+rangecv = range_RIP1
 
 for i in rangecv:
     #-----------Initial Conditions--------------------------

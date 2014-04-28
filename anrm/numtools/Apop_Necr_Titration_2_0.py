@@ -8,7 +8,7 @@ import calibratortools as ct
 import simulator_1_0 as sim
 
 # ----------Model and Initial Conditions----------------
-from anrm.irvin_mod_v4_tester  import model
+from anrm.irvin_mod_v5_tester  import model
 
 range_proC8 = [10, 4875, 9750, 19500, 39022, 78000] #starting at zero causes NaNs when you normalize the data.
 range_cFlip = [0, 4875, 9750, 19500, 39022, 78000]
@@ -18,12 +18,12 @@ range_BidK  = [0, 1000, 2500, 5000, 7500, 10000]
 
 
 #-----------Calibrated Parameters-----------------------
-position = pickle.load(open('CompII_Hypthesis_123_addeddata_4run_v41_Position.pkl'))
+position = pickle.load(open('CompII_Hypthesis_123_newtopology_2run_v40_Position.pkl'))
 
 #-----------Simulator Settings--------------------------
 sims = sim.Settings()
 sims.model = model
-sims.tspan = np.linspace(0,20000,2000) #10hrs converted to seconds (1000 timepoints)
+sims.tspan = np.linspace(0,30000,3000) #10hrs converted to seconds (1000 timepoints)
 sims.estimate_params = model.parameters_rules()
 sims.rtol = 1e-5
 sims.atol = 1e-5
@@ -38,10 +38,10 @@ necro_td = []
 p.ion()
 yout = []
 
-condition_variable = 'Bid_0'
-observable = 'Obs_cPARP'
-graph_name = 'Bid'
-rangecv = range_Bid
+condition_variable = 'BidK_0'
+observable = 'Obs_MLKL'
+graph_name = 'BidK'
+rangecv = range_BidK
 
 for i in rangecv:
     #-----------Initial Conditions--------------------------
@@ -55,7 +55,7 @@ for i in rangecv:
 for j in range(len(rangecv)):
     p.plot(sims.tspan, yout[j], label = '%s %s per cell' % (rangecv[j], graph_name))
 
-p.title('PARP cleavage in cells with varying initial %s concentrations' % graph_name)
+p.title('MLKL activation in cells with varying initial %s concentrations' % graph_name)
 p.xlabel('time [sec]')
 p.ylabel('PARP concentration [molecules per cell]')
-p.legend()
+p.legend(loc = 'upper left')

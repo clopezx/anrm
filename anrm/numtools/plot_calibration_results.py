@@ -10,7 +10,7 @@ import simulator_1_0 as sim
 import bayes_mcmc as bmc
 import matplotlib.pyplot as plt
 
-Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v0')
+Exp_name = ('CompII_Hyp_123_Bid_Hyp0_newtopology_1run_v0')
 
 #----Describing Published Data-----
 def ydata_fn():
