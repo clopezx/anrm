@@ -215,7 +215,7 @@ def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=
     map_args = surf_calc_mesh_pos, inputs
     if parallelize:
         try:
-            pool = multiprocessing.Pool()
+            pool = multiprocessing.Pool(processes=12)
             outputs = pool.map(*map_args)
             pool.close()
         except KeyboardInterrupt:
