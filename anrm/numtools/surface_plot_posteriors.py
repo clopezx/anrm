@@ -151,11 +151,12 @@ sigma = 0.1;
 ntimes = 20;
 pred_k = 'Apop2'
 yout = ['Obs_cPARP']
+experiment ='CompII_Hypthesis_123_newtopology_2run_v40'
 
 # show prediction for C trajectory, which was not fit to
-bp.surf(mcmc, dim0, dim1, mask=True, walk=True, rejects=True, step=1,
+bp.surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
      square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
-     zmax=None, position_base=None, parallelize=True, gridsize=20,experiment ='CompII_Hypthesis_123_newtopology_2run_v40')
+     zmax=None, position_base=None, parallelize=True, gridsize=20)
 
 """
 Display the posterior of an MCMC walk on a 3-D surface.
