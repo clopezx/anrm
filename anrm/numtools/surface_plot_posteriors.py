@@ -154,7 +154,7 @@ yout = ['Obs_cPARP']
 experiment ='CompII_Hypthesis_123_newtopology_2run_v40'
 
 # show prediction for C trajectory, which was not fit to
-bp.surf(mcmc, dim0, dim1, experiment, mask=False, walk=True, rejects=True, step=1,
+bp.surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
      square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
      zmax=None, position_base=None, parallelize=True, gridsize=20)
 

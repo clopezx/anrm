@@ -112,7 +112,7 @@ def scatter(mcmc, mask=True):
     # TODO: would axis('scaled') force the aspect ratio we want?
     plt.show()
 
-def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
+def surf(mcmc, dim0, dim1, experiment = None, mask=True, walk=True, rejects=True, step=1,
          square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
          zmax=None, position_base=None, parallelize=True, gridsize=20):
     """
@@ -170,9 +170,7 @@ def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=
     """
     # mask off the annealing (burn-in) phase, or up to a user-specified step
     if mask is True:
-        print mask
         mask = mcmc.options.anneal_length
-        print mask
     elif mask is False:
         mask = 0
     # create masked versions of a few vectors of interest
