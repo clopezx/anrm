@@ -112,7 +112,7 @@ def scatter(mcmc, mask=True):
     # TODO: would axis('scaled') force the aspect ratio we want?
     plt.show()
 
-def surf(mcmc, dim0, dim1, experiment = None, mask=True, walk=True, rejects=True, step=1,
+def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
          square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
          zmax=None, position_base=None, parallelize=True, gridsize=20):
     """

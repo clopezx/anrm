@@ -139,24 +139,12 @@ prior_var = 6.0
 mcmc = bmc.MCMC(opts)
 mcmc.run()
 
-mixed_nsteps = opts.nsteps / 2
-mixed_positions = mcmc.positions[-mixed_nsteps:]
-mixed_accepts = mcmc.accepts[-mixed_nsteps:]
-mixed_accept_positions = mixed_positions[mixed_accepts]
-marginal_mean_pos = np.mean(mixed_accept_positions, 0)
-
 dim0 = 0
 dim1 = 1
-sigma = 0.1;
-ntimes = 20;
-pred_k = 'Apop2'
-yout = ['Obs_cPARP']
 experiment ='CompII_Hypthesis_123_newtopology_2run_v40'
 
 # show prediction for C trajectory, which was not fit to
-bp.surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
-     square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
-     zmax=None, position_base=None, parallelize=True, gridsize=20)
+bp.surf(mcmc, dim0, dim1, experiment)
 
 """
 Display the posterior of an MCMC walk on a 3-D surface.
