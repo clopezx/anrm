@@ -171,8 +171,10 @@ def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=
     # mask off the annealing (burn-in) phase, or up to a user-specified step
     if mask is True:
         mask = mcmc.options.anneal_length
+        print " True mask = %s" % mask
     elif mask is False:
         mask = 0
+        print " False mask = %s" % mask
     # create masked versions of a few vectors of interest
     display_slice = slice(mask, None, step)
     accept_mask = mcmc.accepts[display_slice]
