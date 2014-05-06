@@ -324,6 +324,7 @@ class MCMC(object):
         
         prior = self.calculate_prior(position)
         likelihood = self.calculate_likelihood(position)
+        print "calculating posterior"
         posterior = prior + likelihood * self.options.thermo_temp
         
         return posterior, prior, likelihood

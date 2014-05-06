@@ -119,7 +119,7 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 10
+opts.nsteps = 100
 opts.initial_values = np.power(10, initial_position)
 #opts.initial_values = solve.initial_values
 opts.likelihood_fn = objective_fn
@@ -146,7 +146,7 @@ experiment ='CompII_Hypthesis_123_newtopology_2run_v40'
 # show prediction for C trajectory, which was not fit to
 bp.surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=1,
      square_aspect=True, margin=0.1, bounds0=None, bounds1=None, zmin=None,
-     zmax=None, position_base=None, parallelize=True, gridsize=20)
+     zmax=None, position_base=None, parallelize=False, gridsize=20)
 
 """
 Display the posterior of an MCMC walk on a 3-D surface.
