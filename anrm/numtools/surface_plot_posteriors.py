@@ -119,7 +119,7 @@ solve.run()
 
 #----Bayesian and MCMC Options----
 opts = bmc.MCMCOpts()
-opts.nsteps = 100
+opts.nsteps = 10
 opts.initial_values = np.power(10, initial_position)
 #opts.initial_values = solve.initial_values
 opts.likelihood_fn = objective_fn

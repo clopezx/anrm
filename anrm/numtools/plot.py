@@ -215,7 +215,7 @@ def surf(mcmc, dim0, dim1, experiment, mask=True, walk=True, rejects=True, step=
     map_args = surf_calc_mesh_pos, inputs
     if parallelize:
         try:
-            pool = multiprocessing.Pool(processes=12)
+            pool = multiprocessing.Pool(processes=400)
             outputs = pool.map(*map_args)
             pool.close()
         except KeyboardInterrupt:
@@ -271,6 +271,7 @@ def surf_calc_mesh_pos(args):
         position = position_base.copy()
         position[dim0] = p0_val
         position[dim1] = p1_val
+        print "calculating posterior for dim0 and dim1 equal to %s and %s respectively" % (p0_val, p1_val)
         return mcmc.calculate_posterior(position)[0]
     except KeyboardInterrupt:
         raise RuntimeError()
