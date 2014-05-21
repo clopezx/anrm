@@ -62,7 +62,7 @@ def TNFa_to_ComplexI_Monomers():
     alias_model_components()
 
 def TNFa_to_ComplexI_Initials():
-    Parameter('TNFa_0'  ,  6000) # 6000 corresponds to 100ng/ml TNFa
+    Parameter('TNFa_0'  ,  600) # 6000 corresponds to 100ng/ml TNFa
     Parameter('TNFR1_0' ,  4800) # 4800 receptors per cell
     Parameter('TRADD_0' ,  9000) # molecules per cell (arbitrarily assigned) 9000
     Parameter('RIP1_0'  , 12044) # molecules per cell (arbitrarily assigned) 12044
@@ -159,8 +159,8 @@ def ComplexII_to_Bid_Monomers():
     Monomer('MLKL', ['bRHIM', 'state'], {'state':['unmod', 'active', 'inactive']})
 
 def ComplexII_to_Bid_Initials():
-    Parameter('flip_L_0',  39022) # 39022 molecules per cell (J Immunol 2005)
-    Parameter('flip_S_0',  39022) # molecules per cell assummed both isoforms w/conc.
+    Parameter('flip_L_0',  39023) # 39022 molecules per cell (J Immunol 2005)
+    Parameter('flip_S_0',  39023) # molecules per cell assummed both isoforms w/conc.
     Parameter('proC8_0' ,  16057) # procaspase 8 molecules per cell 16057 (J Immunol 2005)
     Parameter('C8_0'    ,      0) # active caspase 8 dimers per cell.
     Parameter('RIP3_0'  ,  2.0e4) # molecules per cell
@@ -242,7 +242,7 @@ def C8_catalyzed_truncations():
     #   RIP1 + C8 <-> RIP1:C8 >> RIP1[trunc] + C8
     #   RIP3 + C8 <-> RIP3:C8 >> RIP3[trunc] + C8
     #   Bid + C8 <-> Bid:C8 >> Bid[trunc] + C8
-    #   CYLD + C8 <-> CYLD:C8 >> CYLD
+    #   CYLD + C8 <-> CYLD:C8 >> CYLD[trunc] + C8
     
     catalyze_state(C8(bf = None, state = 'A'), 'bf', RIP1(bDD=None), 'bRHIM', 'state', 'unmod', 'trunc', [1e-6, 1e-3, 1e-1])
     
@@ -290,6 +290,7 @@ def NFkB_Activation_and_Signaling():
 
 def Bid_Hypothesis_monomers():
     Monomer('BidK', ['bf']) #unknown Bid-kinase
+    Monomer('Bid_po4', ['bf1', 'bf2', 'bf3'])
 
 def Bid_Hypothesis_initials():
     """Defines the interactoins from TRADD RIP1 and FADD to generation of secondary
@@ -306,9 +307,11 @@ def Bid_Hypothesis_initials():
         """
     
     Parameter('BidK_0'  , 5.0e3) # molecules per cell
+    Parameter('Bid_po4_0'  , 0) # molecules per cell
     
     alias_model_components()
     Initial(BidK(bf = None), BidK_0)
+    Initial(Bid_po4(bf1 = None, bf2 = None, bf3 = None), Bid_po4_0)
 
 def Bid_Hypothesis():
     """The Zinkel lab found evidence of Bid mediated inhibition of necroptosis. Dr. Zinkel proposed that Bid has a third state (e.g. phosporylated) that can inhibit the necrosome by sequestering RIP3. We presume that Bid-po4 cannot be truncated. There are 3 phosphorylation sites on Bid and evidence that BId-po4 is resistant to truncation exists"""
@@ -330,6 +333,26 @@ def Bid_RIP_C8_truncation():
 def Bid_RIP_proC8_to_NFkB():
     #Bid mediated inhibition of necrosis (hypothesis 1)
     Rule('Bid_RIP_NFkB', RIP1(bDD = ANY, bRHIM =  ANY, state = 'unmod') % Bid(bf = ANY, state = 'po4') % proC8(bDED = ANY) >> NSC(bnfkb=None), Parameter('kbid7', 1e-1))
+
+def Bid_Hypothesis_2():
+    """The Zinkel lab found evidence of Bid mediated inhibition of necroptosis. Dr. Zinkel proposed that Bid has a third state (e.g. phosporylated) that can inhibit the necrosome by recruiting proc8 and cFlip to form a complex capable of truncating RIP1 and CYLD
+        
+        In order to make this function of Bid ligand dependent, we require proC8 and cFlip to be recruited from 
+        the secondary complex (not lone proteins in the cytoplasm)"""
+
+    #-------------Bid Interactions--------------------------
+    # Bid Phosphorylation and Truncation
+    bind(BidK(bf = None), 'bf', Bid(bf = None, state = 'U'), 'bf', [1e-6, 1e-3])
+    Rule('Bid_phophorylation', BidK(bf =  ANY)%Bid(bf = ANY, state = 'U') >> BidK(bf = None) + Bid_po4(bf1 =  None, bf2 =  None, bf3 = None), Parameter('kc_Bid_po4', 1e-1))
+
+    Rule('CompII_to_Bid1', FADD(bDED1=1, bDED2=2)%flip_L(bDED=1)%proC8(bDED=2) + Bid_po4(bf1 = None, bf2 = None, bf3 = None) >> Bid_po4(bf1 = 1, bf2 = 2, bf3 = None)%flip_L(bDED=1)%proC8(bDED=2) + FADD(bDED1 = None, bDED2 = None), Parameter('kc_BidHypothesis_1', 1e-1))
+         
+    Rule('CompII_to_Bid2', FADD(bDED1=1, bDED2=2)%flip_L(bDED=2)%proC8(bDED=1) + Bid_po4(bf1 = None, bf2 = None, bf3 = None) >> Bid_po4(bf1 = 1, bf2 = 2, bf3 = None)%flip_L(bDED=2)%proC8(bDED=1) + FADD(bDED1 = None, bDED2 = None), Parameter('kc_BidHypothesis_2', 1e-1))
+
+def Bid_proC8_cleaves_substrates():
+    #--------------Phospho-Bid Interactions------------------
+    catalyze_state(Bid_po4(bf1 = ANY, bf2 =ANY), 'bf3', RIP1(), 'bRHIM', 'state', 'unmod', 'trunc', [1e-6, 1e-3, 1e-1])
+    catalyze_state(Bid_po4(bf1 = ANY, bf2 =ANY), 'bf3', CYLD(), 'btraf', 'state', 'U', 'T', [1e-6, 1e-3, 1e-1])
 
 def C3_inhibits_MLKL():
     """it has not been established whether MLKL is de-activated in apoptosis. But inorder to make a cellular decision you have to have one choice, once selected, inhibit all of the alternative pathways. This is a hypothetical apoptosis mediated inhibition of necrosis effector, MLKL."""

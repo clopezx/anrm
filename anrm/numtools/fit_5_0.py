@@ -10,7 +10,7 @@ import simulator_1_0 as sim
 import bayes_mcmc as bmc
 import matplotlib.pyplot as plt
 
-from anrm.irvin_mod_v4_tester import model
+from anrm.irvin_mod_v5_wo_po4bid import model
 
 #----Experimental Data----
 """
@@ -28,7 +28,7 @@ from anrm.irvin_mod_v4_tester import model
     step:
 """
 #-----------Previously Calibrated Parameters------------
-#initial_position = pickle.load(open('CompII_Hypthesis_123_addeddata_4run_v23_Position.pkl'))
+initial_position = pickle.load(open('CompII_Hypthesis_123_newtopology_1run_v4_Position.pkl'))
 
 #----User Defined Functions-----
 def ydata_fn():
@@ -108,7 +108,7 @@ def step(mcmc):
              mcmc.accept_likelihood, mcmc.accept_prior, mcmc.accept_posterior)
 
 #----Experiment Name--------
-Exp_name = ('CompII_Hypthesis_123_newtopology_1run_v1')
+Exp_name = ('CompII_Hyp_123_Bid_Hyp0_newtopology_1run_v4')
 
 #----Data and conditions----
 ydata = ydata_fn()
@@ -175,7 +175,7 @@ for param, new_value in zip(sims.estimate_params, fitted_values):
 # save data
 initial_params = [p.value for p in sims.estimate_params]
 
-for k in conditions.keys():
+for k in ydata.keys():
     yinitial = ct.normalize(ct.extract_records(solve.simulate(np.log10(initial_params), observables = True, initial_conc = conditions[k]), ynorm[k][1]), option = 1)
     pickle.dump(yinitial, open('%s_Initial_Values_%s.pkl' % (Exp_name, k), 'wb'))
     
@@ -185,14 +185,13 @@ for k in conditions.keys():
 pickle.dump(mcmc.position, open('%s_Position.pkl' % Exp_name, 'wb'))
 
 
-# plot data
+"""# plot data
 plt.ion()
 tspan = sims.tspan/3600
 initial_params = [p.value for p in sims.estimate_params]
 ii = 0
 colors = ['b', 'g', 'r', 'c']
 
-"""
 for k in conditions.keys():
     plt.errorbar(ynorm[k][0][:,0], ynorm[k][0][:,1], yerr = ynorm[k][0][:,2], fmt = '%s.' % colors[ii], label = '%s data' % k)
 

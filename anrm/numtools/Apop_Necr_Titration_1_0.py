@@ -3,24 +3,29 @@
 
 import numpy as np
 import pylab as pl
+import pickle
 import calibratortools as ct
 import simulator_1_0 as sim
 
 # ----------Model and Initial Conditions----------------
-from anrm.irvin_anrm_experiment_16 import model
+from anrm.irvin_mod_v5_tester  import model
 
-range_proC8 = np.linspace(0,50000,51) #starting at zero causes NaNs when you normalize the data.
+range_proC8 = np.linspace(10,50000,101) #starting at zero causes NaNs when you normalize the data.
 range_cFlip = np.linspace(0,200000,201)
-range_Bid   = np.linspace(0,16000,51)
-range_XIAP  = np.linspace(0,35000, 101)
+range_Bid   = np.linspace(0,24000,101)
+range_RIP1  = np.linspace(10,35000, 101)
+range_BidK  = np.linspace(0, 10000, 51)
+
+#-----------Calibrated Parameters-----------------------
+position = pickle.load(open('CompII_Hypthesis_123_newtopology_2run_v40_Position.pkl'))
 
 #-----------Simulator Settings--------------------------
 sims = sim.Settings()
 sims.model = model
-sims.tspan = np.linspace(0,86400,1000) #24hrs converted to seconds (1000 timepoints)
+sims.tspan = np.linspace(0,72000,4000) #24hrs converted to seconds (4000 timepoints)
 sims.estimate_params = model.parameters_rules()
-sims.rtol = 1e-3
-sims.atol = 1e-6
+sims.rtol = 1e-5
+sims.atol = 1e-5
 
 solve = sim.Solver(sims)
 solve.run()
@@ -29,11 +34,15 @@ delta_td = []
 apopt_td = []
 necro_td = []
 
-for i in range_XIAP:
+condition_variable = 'RIP1_0'
+graph_name = 'RIP1'
+rangecv = range_RIP1
+
+for i in rangecv:
     #-----------Initial Conditions--------------------------
     ic_params  = model.parameters_initial_conditions()
-    conditions = ct.initial_conditions(['XIAP_0'], [i], ic_params)
-    ysim = solve.simulate(position = None, observables=True, initial_conc = conditions)
+    conditions = ct.initial_conditions([condition_variable], [i], ic_params)
+    ysim = solve.simulate(position = position, observables=True, initial_conc = conditions)
 
     #-----------Calculate Time Delays-----------------------
     PARP_MLKL_signals   = ct.extract_records(ysim, ['Obs_cPARP', 'Obs_MLKL'])
@@ -49,16 +58,16 @@ for i in range_XIAP:
 #------------Plot Results--------------------------------
 pl.ion()
 pl.figure('Cell Death Signals')
-pl.plot(range_XIAP, apopt_td)
-pl.plot(range_XIAP, necro_td)
-pl.xlabel('XIAP [molecules/cell]')
+pl.plot(rangecv, apopt_td)
+pl.plot(rangecv, necro_td)
+pl.xlabel('%s [molecules/cell]' % graph_name)
 pl.ylabel('Time delay [s]')
-pl.title('Time delay of apoptotic and necrotic signals vs. XIAP content')
+pl.title('Time delay of apoptotic and necrotic signals vs. %s content' % graph_name)
 
 pl.figure('Cell Death Signals 2')
 pl.ion()
-pl.plot(range_XIAP, delta_td)
-pl.xlabel('XIAP  [molecules/cell]')
+pl.plot(rangecv, delta_td)
+pl.xlabel('%s  [molecules/cell]' % graph_name)
 pl.ylabel('Difference in time delay between apoptotic and necrotic signals [s]')
-pl.title('Time delay of apoptotic and necrotic signals vs. XIAPcontent')
+pl.title('Time delay of apoptotic and necrotic signals vs. %s content' % graph_name)
 pl.show()
